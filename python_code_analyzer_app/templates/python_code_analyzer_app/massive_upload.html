@@ -1,0 +1,12 @@
+{% extends "python_code_analyzer_app/base.html" %}
+
+{% block content %}
+	<p>Upload a file:</p>
+ 
+	<form action="{% url 'python_code_analyzer_app:massive_upload' %}" enctype="multipart/form-data" method='post'>
+		{% csrf_token %}
+		{{ form.as_p }}
+		<button name="submit">Upload</button>
+	</form>
+ 
+{% endblock content %}
