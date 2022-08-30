@@ -5,6 +5,17 @@
 	python -m venv pca_env
 5) Iniciar el virtual env
 	pca_env\Scripts\activate
-6)Instalar los requerimientos:
+6) En la misma consola instalar los requerimientos:
 	pip install requirements.txt
-7)
+7) Correr las migraciones para crear la base de datos:
+	python manage.py migrate
+8) Correr los inserts de las tools en la base de datos: 
+	Tools Insert.sql
+9) Instalar RabbitMQ. Con Docker se puede usar la siguiente imagen:
+	docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.10-management
+10) En la consola del virtual env poner a correr el servidor:
+	python manage.py runserver
+11) Abrir otra consola como administrador, ir a la carpeta del proyecto, iniciar el virtual env y correr Celery:
+	celery -A python_code_analyzer worker -l info --pool=solo
+
+
