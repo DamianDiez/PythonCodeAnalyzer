@@ -1,9 +1,9 @@
 {% extends 'python_code_analyzer_app/base.html' %}
 {% block content %}
 <p>Analysis: {{ analysis }}</p>
+<p>Status: {{ analysis.status }}</p>
 <p>Date: {{ analysis.date_added }}</p>
 <p>End Date: {{ analysis.date_finished }}</p>
-<p>Status: {{ analysis.status }}</p>
 {% if analysis.status == 'FINISHED' %}
 	<a href="{% url 'python_code_analyzer_app:analysis_result' analysis.id %}">Ver resultados</a>
 {% endif %}
