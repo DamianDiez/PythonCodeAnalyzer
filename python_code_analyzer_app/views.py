@@ -1,5 +1,6 @@
 import os
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404
 # from django.htpp import StreamingHttpResponse
 # from WSGIREF.UTIL import FileWrapper
@@ -14,12 +15,14 @@ def index(request):
     """The home page for Python Code Analyzer."""
     return render(request, 'python_code_analyzer_app/index.html')
 
+@login_required
 def repositories(request):
     """Show all repositories."""
     repositories = Repository.objects.order_by('date_added')
     context = {'repositories': repositories}
     return render(request, 'python_code_analyzer_app/repositories.html', context)
 
+@login_required
 def repository(request, repository_id):
     """Show a single repository and all its analyzes."""
     repository = Repository.objects.get(id=repository_id)
@@ -27,6 +30,7 @@ def repository(request, repository_id):
     context = {'repository': repository, 'analyzes': analyzes}
     return render(request, 'python_code_analyzer_app/repository.html', context)
 
+@login_required
 def new_repository(request):
     """Add a new repository."""
     if request.method != 'POST':
@@ -43,6 +47,7 @@ def new_repository(request):
     context = {'form': form}
     return render(request, 'python_code_analyzer_app/new_repository.html', context)
 
+@login_required
 def massive_upload(request):
     """Add a repositories from file."""
     if request.method == 'POST':
@@ -60,6 +65,7 @@ def massive_upload(request):
         form = UploadFileForm()
     return render(request, 'python_code_analyzer_app/massive_upload.html', {'form': form})
 
+@login_required
 def new_analysis(request, repository_id):
     """Add a new analysis for a particular topic."""
     repository = Repository.objects.get(id=repository_id)
@@ -103,6 +109,7 @@ def new_analysis(request, repository_id):
     context = {'repository': repository, 'form': form, 'all_tools': all_tools }
     return render(request, 'python_code_analyzer_app/new_analysis.html', context)
 
+@login_required
 def analysis(request, analysis_id):
     """Show a single analysis detail"""
     analysis = Analysis.objects.get(id=analysis_id)
@@ -110,6 +117,7 @@ def analysis(request, analysis_id):
     context = {'analysis': analysis}
     return render(request, 'python_code_analyzer_app/analysis.html', context)
 
+@login_required
 def analysis_result(request, analysis_id):
     """Show a single analysis detail"""
     analysis = Analysis.objects.get(id=analysis_id)
@@ -124,13 +132,14 @@ def analysis_result(request, analysis_id):
             return response
     raise Http404
     
-
+# @login_required
 # def analysis_result(request, analysis_id):
 #     """Show a single analysis detail"""
 #     tools = AnalysisTool.objects.filter(analysis_id=analysis_id)
 #     context = {'tools': tools}
 #     return render(request, 'python_code_analyzer_app/analysis_result.html', context)
 
+@login_required
 def cancel_analysis(request, analysis_id):
     print("Cancel Analysis")
     """Cancel a single analysis"""
