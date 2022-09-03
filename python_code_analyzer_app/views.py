@@ -18,7 +18,7 @@ def index(request):
 @login_required
 def repositories(request):
     """Show all repositories."""
-    repositories = Repository.objects.order_by('date_added')
+    repositories = Repository.objects.filter(owner=request.user).order_by('date_added')
     context = {'repositories': repositories}
     return render(request, 'python_code_analyzer_app/repositories.html', context)
 
@@ -26,6 +26,9 @@ def repositories(request):
 def repository(request, repository_id):
     """Show a single repository and all its analyzes."""
     repository = Repository.objects.get(id=repository_id)
+    # Make sure the repository belongs to the current user.
+    if repository.owner != request.user:
+        raise Http404
     analyzes = repository.analysis_set.order_by('-date_added')
     context = {'repository': repository, 'analyzes': analyzes}
     return render(request, 'python_code_analyzer_app/repository.html', context)
@@ -40,7 +43,9 @@ def new_repository(request):
         # POST data submitted; process data.
         form = RepositoryForm(data=request.POST)
         if form.is_valid():
-            form.save()
+            new_repository = form.save(commit=False)
+            new_repository.owner = request.user
+            new_repository.save()
             return redirect('python_code_analyzer_app:repositories')
     
     # Display a blank or invalid form.
@@ -67,7 +72,7 @@ def massive_upload(request):
 
 @login_required
 def new_analysis(request, repository_id):
-    """Add a new analysis for a particular topic."""
+    """Add a new analysis for a particular repository."""
     repository = Repository.objects.get(id=repository_id)
     all_tools = Tool.objects.all();
 

@@ -1,5 +1,6 @@
 from asgiref.sync import sync_to_async
 from django.db import models
+from django.contrib.auth.models import User
 from datetime import datetime
 import os, shutil, stat
 import pylint
@@ -177,6 +178,7 @@ class Repository(models.Model):
     # path = models.CharField(max_length=256, default=os.path.join(BASE_PATH,datetime.now().strftime("%Y%m%d%H%M%S%f")))
     folder = models.CharField(max_length=256, default=datetime.now().strftime("%Y%m%d%H%M%S%f"))
     date_added = models.DateTimeField(auto_now_add=True) 
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     class Meta:
         verbose_name_plural = 'repositories'
     def __str__(self):
