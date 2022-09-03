@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     # My apps
     'python_code_analyzer_app',
+    'users',
     # Default django apps.
     'django.contrib.admin',
     'django.contrib.auth',
