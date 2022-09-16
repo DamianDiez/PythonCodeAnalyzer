@@ -60,7 +60,7 @@ def launch_massive_upload(filename, userId):
         print("launch_massive_upload - Va a leer una linea del archivo")
         for url in archivo:
             # TODO: chequear si la tarea no esta cancelada
-            
+            url = url.rstrip()
             print(f"launch_massive_upload - url: {url}")
             
             #me fijo si existe el repositorio
