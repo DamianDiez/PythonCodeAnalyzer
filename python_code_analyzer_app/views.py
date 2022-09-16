@@ -65,7 +65,7 @@ def massive_upload(request):
                     destination.write(chunk)
             print(f"Va a mostrar el user")
             print(f"massive_upload - user id = {request.user.id}")
-            task_id = launch_massive_upload.apply_async(("C:/tesis/git/massive.txt",request.user.id,),countdown=5)
+            task_id = launch_massive_upload.apply_async(("C:/tesis/git/massive.txt",request.user.id,),countdown=5,queue='repository_queue')
             return redirect('python_code_analyzer_app:index')
     else:
         form = UploadFileForm()

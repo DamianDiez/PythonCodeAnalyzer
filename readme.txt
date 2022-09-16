@@ -17,6 +17,9 @@
 	python manage.py runserver
 11) Abrir otra consola como administrador, ir a la carpeta del proyecto, iniciar el virtual env y correr Celery:
 	celery -A python_code_analyzer worker -l info --pool=solo
-12) Crear un super user
+12) Abrir otra consola como administrador, ir a la carpeta del proyecto, iniciar el virtual env y correr Celery:
+	celery -A python_code_analyzer worker -l info --pool=solo -Q repository_queue -n repository@celery.com
+	Esta es para que se ejecuten de manera separada la insercion de repositorios
+13) Crear un super user
 	python manage.py createsuperuser
 	Pide nombre de usuario y password. Recordarlo para poder entrar como administrador y porder crear mas usuarios, configurar tools, etc.
