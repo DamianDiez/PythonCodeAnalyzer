@@ -59,12 +59,13 @@ def massive_upload(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             f = request.FILES['file']
+            print(f"Nombre del archivo: {f.name}")
             with open("C:/tesis/git/massive.txt", 'wb+') as destination:
                 for chunk in f.chunks():
                     destination.write(chunk)
-            # for text in f.readlines():
-            #     print(text)
-            task_id = launch_massive_upload.apply_async(("C:/tesis/git/massive.txt",),countdown=5)
+            print(f"Va a mostrar el user")
+            print(f"massive_upload - user id = {request.user.id}")
+            task_id = launch_massive_upload.apply_async(("C:/tesis/git/massive.txt",request.user.id,),countdown=5)
             return redirect('python_code_analyzer_app:index')
     else:
         form = UploadFileForm()

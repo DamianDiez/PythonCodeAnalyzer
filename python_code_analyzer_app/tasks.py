@@ -1,4 +1,5 @@
 from celery import shared_task
+from django.contrib.auth.models import User
 from .models import Repository, Analysis, AnalysisTool, CeleryTaskSignal, Tool
 from time import sleep
 from datetime import datetime
@@ -52,7 +53,7 @@ def excecute_analysis(analysis_id):
     #     return False
 
 @shared_task
-def launch_massive_upload(filename):
+def launch_massive_upload(filename, userId):
     print(f"launch_massive_upload - Begin. File {filename}")
     url=""
     with open(filename) as archivo:
@@ -64,7 +65,8 @@ def launch_massive_upload(filename):
             
             #me fijo si existe el repositorio
             print("launch_massive_upload - Chequeo si existe el repositorio")
-            repositories = Repository.objects.filter(url=url)
+            user=User.objects.get(id=userId)
+            repositories = Repository.objects.filter(url=url, owner=user)
             repository = None
             repository = Repository()
             if len(repositories) > 0:
@@ -75,6 +77,7 @@ def launch_massive_upload(filename):
                 print("launch_massive_upload - No existe el repositorio, lo creo")
                 repository.url=url
                 repository.folder = datetime.now().strftime("%Y%m%d%H%M%S%f")
+                repository.owner=user
                 repository.save()
 
             #agrego un analisis
