@@ -160,5 +160,5 @@ def cancel_analysis(request, analysis_id):
     cts.signal = CeleryTaskSignal.CANCEL_TASK
 
     cts.save()
-    analysis.cancel()
+    analysis.cancel("Canceled by user")
     return repository(request, analysis.repository_id)

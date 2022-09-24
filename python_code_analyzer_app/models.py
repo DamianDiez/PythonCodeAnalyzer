@@ -205,7 +205,15 @@ class Repository(models.Model):
         subprocess.call(cmd, shell = True)
         print("Finshed cloning {}".format(self.url))
         print("#####################################")
-    
+
+    def getLastCommit(self):
+        print(f'Repository.getLastCommit - repository path {self.path}..')
+
+        result = subprocess.run(["git","-C", self.path, "rev-parse", "HEAD"], capture_output=True,shell=True)
+        commit = result.stdout.strip()
+        print(f"Repository.donwnload - commit: {commit}")
+        return commit
+
     def is_being_analyzed(self):
         analyzes = self.analysis_set.filter(status=RUNNING)
         if len(analyzes) > 0:
@@ -249,7 +257,9 @@ class Analysis(models.Model):
     date_added = models.DateTimeField(auto_now_add=True) 
     date_finished = models.DateTimeField(auto_now = True, null=True, blank=True)
     task_id = models.CharField(max_length=50, null=False, blank=False, default='null')
-    
+    commit = models.CharField(max_length=40, null=False, blank=False, default='null')
+    status_msg = models.CharField(max_length=256, default='null')
+
     class Meta:
         verbose_name_plural = 'analyzes'
     def __str__(self):
@@ -279,9 +289,18 @@ class Analysis(models.Model):
             self.status = FINISHED
         self.save()
 
-    def cancel(self):
+    def cancel(self, status_msg):
         self.status = CANCELLED
+        self.status_msg=status_msg
         self.save()
+
+    def set_commit(self,commit):
+        self.commit=commit
+        self.save()
+
+    def was_excecuted(self):
+        analysis_related = Analysis.objects.filter(commit=self.commit, status=FINISHED)
+        return len(analysis_related) > 0
 
 class AnalysisTool(models.Model):
     analysis = models.ForeignKey(Analysis, on_delete=models.CASCADE)

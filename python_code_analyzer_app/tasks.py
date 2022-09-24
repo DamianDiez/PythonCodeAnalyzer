@@ -19,9 +19,10 @@ def excecute_analysis(analysis_id):
     
     if(repository.is_being_analyzed()):
         #loguear que se esta ejecutando otro analisis
-        print(f'excecute_analysis - an analysis is already executing for this repository {repository.id}...')
+        status_msg=f'excecute_analysis - an analysis is already executing for this repository {repository.id}...'
+        print(status_msg)
         #cancelar la ejecucion de este
-        analysis.cancel()
+        analysis.cancel(status_msg)
         return False
 
     print(f"excecute_analysis - start - analysis: {analysis} ")
@@ -38,6 +39,14 @@ def excecute_analysis(analysis_id):
     #try:
     #descargar el repositorio
     repository.download()
+    commit = repository.getLastCommit()
+    #seteo el commit
+    analysis.set_commit(commit)
+
+    if analysis.was_excecuted():
+        status_msg=f'excecute_analysis - an analysis for this commit ({commit}) was executed previously...'
+        analysis.cancel(status_msg)
+        return False
 
     print(f"excecute_analysis - run - analysis: {analysis} ")
     if (CeleryTaskSignal.is_task_cancelled(analysis)):
