@@ -10,6 +10,8 @@ from python_code_analyzer.celery import app
 from .models import Repository, Analysis, Tool, AnalysisTool, CeleryTaskSignal
 from .forms import RepositoryForm, AnalysisForm, AnalysisToolForm, UploadFileForm
 
+from django.core.paginator import Paginator
+
 
 def index(request):
     """The home page for Python Code Analyzer."""
@@ -18,8 +20,14 @@ def index(request):
 @login_required
 def repositories(request):
     """Show all repositories."""
-    repositories = Repository.objects.filter(owner=request.user).order_by('date_added')
-    context = {'repositories': repositories}
+    #repositories = Repository.objects.filter(owner=request.user).order_by('date_added')
+
+    #Set up pagination
+    p = Paginator(Repository.objects.filter(owner=request.user).order_by('date_added'), 20)
+    page = request.GET.get('page')
+    repos = p.get_page(page)
+    #context = {'repositories': repositories}
+    context = {'repositories': repos}
     return render(request, 'python_code_analyzer_app/repositories.html', context)
 
 @login_required
