@@ -19,6 +19,21 @@
 		<li>There are no analyzes for this repository yet.</li>
 	{% endfor %}
 	</ul>
+
+	<br/><br/>
+	<!-- pagination -->
+	{% if analyzes.has_previous %}
+		<a href="?page=1">&laquo First</a>
+		<a href="?page={{ analyzes.previous_page_number }}">Previous</a>
+	{% endif %}
+
+	Page {{analyzes.number}} of {{ analyzes.paginator.num_pages }}
+
+	{% if analyzes.has_next %}
+		<a href="?page={{ analyzes.next_page_number}}">Next</a>
+		<a href="?page={{ analyzes.paginator.num_pages }}">Last &raquo </a>
+	{% endif %}
+	
 	<p>
 		<a href="{% url 'python_code_analyzer_app:new_analysis' repository.id %}">Add new analysis</a>
 	</p>

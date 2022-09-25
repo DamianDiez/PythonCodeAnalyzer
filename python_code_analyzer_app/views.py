@@ -35,6 +35,9 @@ def repository(request, repository_id):
     if repository.owner != request.user:
         raise Http404
     analyzes = repository.analysis_set.order_by('-date_added')
+    p = Paginator(repository.analysis_set.order_by('-date_added'), 10)
+    page = request.GET.get('page')
+    analyzes = p.get_page(page)
     context = {'repository': repository, 'analyzes': analyzes}
     return render(request, 'python_code_analyzer_app/repository.html', context)
 
