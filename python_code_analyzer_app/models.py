@@ -106,52 +106,17 @@ def radon_tool_excecute(tool, analysis_tool):
     path_result = os.path.join(repository.path+"_result",f"Analisis{analysis.id}",f"{tool.name}")
     if not os.path.exists(path_result):
         os.makedirs(path_result)
-    file_result_cc = os.path.join(path_result,"result_cc.txt")
-    file_result_mi = os.path.join(path_result,"result_mi.txt")
-    file_result_raw = os.path.join(path_result,"result_raw.txt")
-    file_result_hal = os.path.join(path_result,"result_hal.txt")
+    file_result_cc = os.path.join(path_result,"result_cc.json")
+    file_result_mi = os.path.join(path_result,"result_mi.json")
+    file_result_raw = os.path.join(path_result,"result_raw.json")
 
     try:
-        # process = subprocess.Popen(['radon', 'cc', repository.path],
-        #                            stdout=subprocess.PIPE,
-        #                            stderr=subprocess.STDOUT)
-        # returncode = process.wait()
-        # print('ping returned {0}'.format(returncode))
-        # with open(file_result_cc, "w") as o:
-        #     with contextlib.redirect_stdout(o):
-        #         print(process.stdout)
         with open(file_result_cc,"wb") as out:
-            subprocess.Popen(['radon', 'cc', repository.path],stdout=out,stderr=subprocess.STDOUT)
+            result = subprocess.run(["radon","cc", '-s', '-j', repository.path], stdout=out, shell=True)
         with open(file_result_mi,"wb") as out:
-            subprocess.Popen(['radon', 'mi', repository.path],stdout=out,stderr=subprocess.STDOUT)
+            result = subprocess.run(["radon","mi", '-s', '-j', repository.path], stdout=out, shell=True)
         with open(file_result_raw,"wb") as out:
-            subprocess.Popen(['radon', 'raw', repository.path],stdout=out,stderr=subprocess.STDOUT)
-        with open(file_result_hal,"wb") as out:
-            subprocess.Popen(['radon', 'hal', repository.path],stdout=out,stderr=subprocess.STDOUT)
-        # config = Config(
-        #     exclude=None,
-        #     ignore=None,
-        #     order='SCORE',
-        #     no_assert=False,
-        #     show_closures=False,
-        #     min='A',
-        #     max='F',
-        # )
-        # print(f"radon_tool_excecute - config created")
-        # h = CCHarvester([repository.path], config)
-        # # h = CCHarvester(["C:/Tesis/git/6123410c37094547b6567f2b94960e40/example.py"], config)
-        # print(f"radon_tool_excecute - CCHarvester created")
-        # results = h.as_json()
-        # print(f"radon_tool_excecute - h._to_dicts() executed")
-        # print(results)
-        # print(f"radon_tool_excecute - result printed")
-        # print(r)
-        # r.as_json()
-        # v.scavenge([f"{repository.path}"])
-        # # sys.stdout = open(file_result, "w")
-        # with open(file_result, "w") as o:
-        #     with contextlib.redirect_stdout(o):
-        #         v.report()
+            result = subprocess.run(["radon","raw", '-s', '-j', repository.path], stdout=out, shell=True)
         
     except BaseException as err:
         print(f"radon_tool_excecute - Unexpected {err=}, {type(err)=}")
