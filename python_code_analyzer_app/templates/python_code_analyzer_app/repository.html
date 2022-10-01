@@ -1,24 +1,32 @@
 {% extends 'python_code_analyzer_app/base.html' %}
-{% block content %}
-<p>Repository: {{ repository }}</p>
-<p>Analyzes:</p>
+{% block page_header %}
+ <h3>{{ repository }}</h3>
+{% endblock page_header %}
 
-	<ul>
+{% block content %}
+
+<!-- <p>Analyzes:</p> -->
+
 	{% for analisis in analyzes %}
-		<li>
-			<p>
-				<a href="{% url 'python_code_analyzer_app:analysis' analisis.id %}">{{analisis}} - {{ analisis.date_added|date:'M d, Y H:i' }} - {{ analisis.status }}</a>
-				{% if analisis.status == 'PENDING' or analisis.status == 'RUNNING' %}
-					<a href="{% url 'python_code_analyzer_app:cancel_analysis' analisis.id %}">Cancel</a>
-				{% endif %}	
-			</p>
-			<!-- <p>Fecha: {{ analisis.date_added|date:'M d, Y H:i' }}</p>
-			<p>Estado: {{ analisis.status }}</p> -->
-		</li>
+		<div class="card mb-3">
+			<h4 class="card-header">
+				{{analisis}}
+				<small>
+					{% if analisis.status == 'PENDING' or analisis.status == 'RUNNING' %}
+						<a href="{% url 'python_code_analyzer_app:cancel_analysis' analisis.id %}">Cancel</a>
+					{% else %}
+						<a href="{% url 'python_code_analyzer_app:analysis' analisis.id %}">View</a>
+					{% endif %}	
+					
+ 				</small>
+ 			</h4>
+ 			<div class="card-body">
+ 				{{ analisis.date_added|date:'M d, Y H:i' }} - {{ analisis.status }}
+ 			</div>
+ 		</div>
 	{% empty %}
-		<li>There are no analyzes for this repository yet.</li>
+		<p>There are no analyzes for this repository yet.</p>
 	{% endfor %}
-	</ul>
 
 	<br/><br/>
 	<!-- pagination -->

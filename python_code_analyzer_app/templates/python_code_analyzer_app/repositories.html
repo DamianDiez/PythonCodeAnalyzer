@@ -1,18 +1,21 @@
 {% extends "python_code_analyzer_app/base.html" %}
-{% block content %}
+{% block page_header %}
+	<h1>Repositories</h1>
+{% endblock page_header %}
 
-	<p>Repositories</p>
+
+{% block content %}
 		<ul>
 		{% for repo in repositories %}
-		<li>
+		<li><h3>
 			<a href="{% url 'python_code_analyzer_app:repository' repo.id %}">{{ repo }}</a>
-		</li>
+		</h3></li>
 		{% empty %}
-			<li>No repositories have been added yet.</li>
+			<li><h3>No repositories have been added yet.</h3></li>
 		{% endfor %}
 		</ul>
-		<a href="{% url 'python_code_analyzer_app:new_repository' %}">Add new repository</a>
-		<a href="{% url 'python_code_analyzer_app:massive_upload' %}">Massive Uplodad</a>
+		<h3><a href="{% url 'python_code_analyzer_app:new_repository' %}">Add new repository</a></h3>
+		<h3><a href="{% url 'python_code_analyzer_app:massive_upload' %}">Massive Uplodad</a></h3>
 
 	<br/><br/>
 	<!-- pagination -->
