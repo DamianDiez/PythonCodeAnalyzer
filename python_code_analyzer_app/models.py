@@ -3,133 +3,17 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
 import os, shutil, stat
-import pylint
-import vulture
-# import sys
 import contextlib
 import subprocess
 import sys
-from radon.cli import Config
-from radon.cli.harvest import CCHarvester
-from pylint import lint
 from time import sleep
 
-
-PENDING = 'PENDING'
-RUNNING = 'RUNNING'
-FINISHED = 'FINISHED'
-FAILED = 'FAILED'
-CANCELLED = 'CANCELLED'
-STATUS_OPTIONS = (
-    (PENDING, 'PENDING'),
-    (RUNNING, 'RUNNING'),
-    (FINISHED, 'FINISHED'),
-    (FAILED, 'FAILED'),
-    (CANCELLED, 'CANCELLED'),
-)
+from .tools.pylint_tool import Pylint_Tool
+from .tools.radon_tool import Radon_Tool
+from .tools.vulture_tool import Vulture_Tool
+from .tools import tools_status
 
 BASE_PATH = "C:/tesis/git/"
-
-def paylint_tool_excecute(tool, analysis_tool):
-    print("Starting paylint_tool_excecute")
-    analysis = Analysis.objects.get(id=analysis_tool.analysis.id)
-    repository = Repository.objects.get(id=analysis.repository_id)
-    print(f"paylint_tool_excecute - repository.path: {repository.path}")
-    path_result = os.path.join(repository.path+"_result",f"Analisis{analysis.id}",f"{tool.name}")
-    
-    if not os.path.exists(path_result):
-        os.makedirs(path_result)
-
-    file_result = os.path.join(path_result,"result.json")
-
-    print(f"paylint_tool_excecute - path_result: {path_result}")
-    # ejemplo
-    # options = ["--recursive=y","--output-format=json:C:/tesis/git/result.json","C:/tesis/git/a3657248f44443498e74ba57bef673d8"]
-    options = ["--recursive=y",f"--output-format=json:{file_result}",f"{repository.path}"]
-
-    try:
-        pylint.lint.Run(options)
-    except BaseException as err:
-        print(f"paylint_tool_excecute - Unexpected {err=}, {type(err)=}")
-    finally:
-        print("Finalizado")
-        return FINISHED
-
-def pysmell_tool_excecute(tool, analysis_tool):
-    print("Starting pysmell_tool_excecute")
-    analysis = Analysis.objects.get(id=analysis_tool.analysis.id)
-    repository = Repository.objects.get(id=analysis.repository_id)
-    print(f"pysmell_tool_excecute - repository.path: {repository.path}")
-    return FINISHED
-
-def pyRef_tool_excecute(tool, analysis_tool):
-    print("Starting pyRef_tool_excecute")
-    analysis = Analysis.objects.get(id=analysis_tool.analysis.id)
-    repository = Repository.objects.get(id=analysis.repository_id)
-    print(f"pyRef_tool_excecute - repository.path: {repository.path}")
-    return FINISHED
-
-def vulture_tool_excecute(tool, analysis_tool):
-    print("Starting vulture_tool_excecute")
-    analysis = Analysis.objects.get(id=analysis_tool.analysis.id)
-    repository = Repository.objects.get(id=analysis.repository_id)
-    print(f"vulture_tool_excecute - repository.path: {repository.path}")
-
-    path_result = os.path.join(repository.path+"_result",f"Analisis{analysis.id}",f"{tool.name}")
-    
-    if not os.path.exists(path_result):
-        os.makedirs(path_result)
-
-    file_result = os.path.join(path_result,"result.txt")
-
-    print(f"vulture_tool_excecute - path_result: {path_result}")
-
-    try:
-        v = vulture.Vulture()
-        v.scavenge([f"{repository.path}"])
-        # sys.stdout = open(file_result, "w")
-        with open(file_result, "w") as o:
-            with contextlib.redirect_stdout(o):
-                v.report()
-        
-    except BaseException as err:
-        print(f"vulture_tool_excecute - Unexpected {err=}, {type(err)=}")
-    finally:
-        print("Finalizado")
-        return FINISHED
-
-def radon_tool_excecute(tool, analysis_tool):
-    print("Starting radon_tool_excecute")
-    analysis = Analysis.objects.get(id=analysis_tool.analysis.id)
-    repository = Repository.objects.get(id=analysis.repository_id)
-    print(f"radon_tool_excecute - repository.path: {repository.path}")
-    path_result = os.path.join(repository.path+"_result",f"Analisis{analysis.id}",f"{tool.name}")
-    if not os.path.exists(path_result):
-        os.makedirs(path_result)
-    file_result_cc = os.path.join(path_result,"result_cc.json")
-    file_result_mi = os.path.join(path_result,"result_mi.json")
-    file_result_raw = os.path.join(path_result,"result_raw.json")
-
-    try:
-        with open(file_result_cc,"wb") as out:
-            result = subprocess.run(["radon","cc", '-s', '-j', repository.path], stdout=out, shell=True)
-        with open(file_result_mi,"wb") as out:
-            result = subprocess.run(["radon","mi", '-s', '-j', repository.path], stdout=out, shell=True)
-        with open(file_result_raw,"wb") as out:
-            result = subprocess.run(["radon","raw", '-s', '-j', repository.path], stdout=out, shell=True)
-        
-    except BaseException as err:
-        print(f"radon_tool_excecute - Unexpected {err=}, {type(err)=}")
-    finally:
-        print("Finalizado")
-        return FINISHED
-
-TOOL_FUNCTIONS={
-    'Pylint': paylint_tool_excecute,
-    'Pysmell': pysmell_tool_excecute,
-    'PyRef': pyRef_tool_excecute,
-    'Vulture': vulture_tool_excecute,
-    'Radon': radon_tool_excecute}
 
 def on_rm_error( func, path, exc_info):
     # path contains the path of the file that couldn't be removed
@@ -140,7 +24,6 @@ def on_rm_error( func, path, exc_info):
 class Repository(models.Model):
     """Un repositorio a ser analizado"""
     url = models.CharField(max_length=256)
-    # path = models.CharField(max_length=256, default=os.path.join(BASE_PATH,datetime.now().strftime("%Y%m%d%H%M%S%f")))
     folder = models.CharField(max_length=256, default=datetime.now().strftime("%Y%m%d%H%M%S%f"))
     date_added = models.DateTimeField(auto_now_add=True) 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -162,7 +45,6 @@ class Repository(models.Model):
             # os.rmdir(self.path)
         os.mkdir(self.path)
         cmd = "git clone {} {}".format(self.url.strip(), self.path)
-        # cmd = "git clone {} {}".format(self.url, "C:/tesis/git/test")
         print("#####################################")
         print("Starting to clone ${}".format(self.url))
         print(cmd)
@@ -180,7 +62,7 @@ class Repository(models.Model):
         return commit
 
     def is_being_analyzed(self):
-        analyzes = self.analysis_set.filter(status=RUNNING)
+        analyzes = self.analysis_set.filter(status=tools_status.RUNNING)
         if len(analyzes) > 0:
             return True
         else:
@@ -206,17 +88,24 @@ class Tool(models.Model):
         choices=TOOL_OPTIONS,
         default=PYLINT,
     )
+    class_name = models.CharField(max_length=256, null=False, default="")
+
     def __str__(self):
         """Return a string representation of the model."""
         return self.name
 
     def run(self, analysis_tool):
-        return TOOL_FUNCTIONS[self.name](self,analysis_tool)
+        print('Tool.run')
+        analysis = Analysis.objects.get(id=analysis_tool.analysis.id)
+        repository = Repository.objects.get(id=analysis.repository_id)
+        tool_class = globals()[self.class_name]()
+        print(f"Tool.run() - tool_class: {tool_class}")
+        return tool_class.run(analysis.id, repository.path, self.name)
 
 class Analysis(models.Model):
     """Analisis de un repositorio"""
     repository = models.ForeignKey(Repository, on_delete=models.CASCADE)
-    status = models.CharField(max_length=15, choices = STATUS_OPTIONS, default=PENDING)
+    status = models.CharField(max_length=15, choices = tools_status.STATUS_OPTIONS, default=tools_status.PENDING)
     herramientas = models.ManyToManyField(Tool, through='AnalysisTool')
     result = models.CharField(max_length=256)
     date_added = models.DateTimeField(auto_now_add=True) 
@@ -232,7 +121,7 @@ class Analysis(models.Model):
         return f'Analysis {self.id}'
 
     def start(self):
-        self.status = RUNNING
+        self.status = tools_status.RUNNING
         self.save()
 
     def run(self):
@@ -242,20 +131,20 @@ class Analysis(models.Model):
             if (CeleryTaskSignal.is_task_cancelled(self.id)):
                 print(f"Analysis.run - Tarea Cancelada {self.id}")
                 return
-            if (tool.run()!=FINISHED):
+            if (tool.run()!=tools_status.FINISHED):
                 failed = True
         if(failed):
-            self.status = FAILED
+            self.status = tools_status.FAILED
         else:
             path_result = os.path.join(self.repository.path+"_result",f"Analisis{self.id}")
             filename = "result"
             format = "zip"
             shutil.make_archive(path_result, format, path_result)
-            self.status = FINISHED
+            self.status = tools_status.FINISHED
         self.save()
 
     def cancel(self, status_msg):
-        self.status = CANCELLED
+        self.status = tools_status.CANCELLED
         self.status_msg=status_msg
         self.save()
 
@@ -264,7 +153,7 @@ class Analysis(models.Model):
         self.save()
 
     def was_excecuted(self):
-        analysis_related = Analysis.objects.filter(commit=self.commit, status=FINISHED)
+        analysis_related = Analysis.objects.filter(commit=self.commit, status=tools_status.FINISHED)
         return len(analysis_related) > 0
 
 class AnalysisTool(models.Model):
@@ -272,7 +161,7 @@ class AnalysisTool(models.Model):
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE)
     default_parameters = models.BooleanField(default=True)
     parameters = models.CharField(max_length=256, default=None, null=True)
-    status = models.CharField(max_length=15, choices = STATUS_OPTIONS, default=PENDING)
+    status = models.CharField(max_length=15, choices = tools_status.STATUS_OPTIONS, default=tools_status.PENDING)
     result = models.CharField(max_length=256, default='')
 
 
