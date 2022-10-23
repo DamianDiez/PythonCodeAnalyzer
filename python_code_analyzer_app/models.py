@@ -102,6 +102,13 @@ class Tool(models.Model):
         print(f"Tool.run() - tool_class: {tool_class}")
         return tool_class.run(analysis.id, repository.path, self.name)
 
+    def get_charts(self, analysis_tool):
+        analysis = Analysis.objects.get(id=analysis_tool.analysis.id)
+        repository = Repository.objects.get(id=analysis.repository_id)
+        tool_class = globals()[self.class_name]()
+        path_result=repository.path+f"_result/Analisis{analysis.id}/{self.name}"
+        return tool_class.get_charts(path_result)
+
 class Analysis(models.Model):
     """Analisis de un repositorio"""
     repository = models.ForeignKey(Repository, on_delete=models.CASCADE)
@@ -156,6 +163,15 @@ class Analysis(models.Model):
         analysis_related = Analysis.objects.filter(commit=self.commit, status=tools_status.FINISHED)
         return len(analysis_related) > 0
 
+    def get_charts(self):
+        tools = self.analysistool_set.all()
+        charts=[]
+        for tool in tools:
+            charts += tool.get_charts()
+        for index in range(len(charts)):
+            charts[index].position=index
+        return charts
+
 class AnalysisTool(models.Model):
     analysis = models.ForeignKey(Analysis, on_delete=models.CASCADE)
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE)
@@ -171,6 +187,10 @@ class AnalysisTool(models.Model):
         self.status=xstatus
         self.save()
         return xstatus
+
+    def get_charts(self):
+        charts = self.tool.get_charts(self)
+        return charts
 
 class CeleryTaskSignal(models.Model):   
     CANCEL_TASK = 'cancel_task'

@@ -1,4 +1,5 @@
 import os
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404
@@ -11,7 +12,6 @@ from .models import Repository, Analysis, Tool, AnalysisTool, CeleryTaskSignal
 from .forms import RepositoryForm, AnalysisForm, AnalysisToolForm, UploadFileForm
 
 from django.core.paginator import Paginator
-
 
 def index(request):
     """The home page for Python Code Analyzer."""
@@ -126,9 +126,15 @@ def new_analysis(request, repository_id):
 @login_required
 def analysis(request, analysis_id):
     """Show a single analysis detail"""
+    list_of_charts = []
     analysis = Analysis.objects.get(id=analysis_id)
-    # analyzes = repository.analysis_set.order_by('-date_added')
-    context = {'analysis': analysis}
+    repository = Repository.objects.get(id=analysis.repository_id)
+    analysis_path = repository.path+"_result" +"/"+f"Analisis{analysis_id}"
+    result_list=analysis.get_charts()
+    list_of_charts=list_of_charts + result_list
+    for x in list_of_charts:
+        print(x.label)
+    context = {'analysis': analysis, 'list_of_charts': list_of_charts}
     return render(request, 'python_code_analyzer_app/analysis.html', context)
 
 @login_required
@@ -145,13 +151,6 @@ def analysis_result(request, analysis_id):
             response['Content-Disposition'] = 'inline; filename=' + os.path.basename(path_to_file)
             return response
     raise Http404
-    
-# @login_required
-# def analysis_result(request, analysis_id):
-#     """Show a single analysis detail"""
-#     tools = AnalysisTool.objects.filter(analysis_id=analysis_id)
-#     context = {'tools': tools}
-#     return render(request, 'python_code_analyzer_app/analysis_result.html', context)
 
 @login_required
 def cancel_analysis(request, analysis_id):
