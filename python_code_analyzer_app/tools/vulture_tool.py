@@ -31,3 +31,30 @@ class Vulture_Tool:
 		finally:
 		    print("Vulture_Tool.run() - Finalizado")
 		    return tools_status.FINISHED
+
+	def get_charts(self, path_result):
+		list_of_charts = []
+		# path_result = path_to_file+"/Radon/result_cc.json"
+		# ranks=[0,0,0,0,0,0]
+		# with open(path_result) as contenido:
+		#     clases = json.load(contenido)
+		#     for clase in clases:
+		#         values = clases[clase]
+		#         # print(values)
+		#         for value in values:
+		#             _type=value["type"]
+		#             if(value["rank"]=='A'):
+		#                 ranks[0]+=1
+		#             if(value["rank"]=='B'):
+		#                 ranks[1]+=1
+		#             if(value["rank"]=='C'):
+		#                 ranks[2]+=1
+		#             if(value["rank"]=='D'):
+		#                 ranks[3]+=1
+		#             if(value["rank"]=='E'):
+		#                 ranks[4]+=1
+		#             if(value["rank"]=='F'):
+		#                 ranks[5]+=1
+		# chart=Chart('chart1', 0, 'pie', 'Cyclomatic Complexity', json.dumps(["A","B","C","D","E","F"]), ranks)
+		# list_of_charts.append(chart)
+		return list_of_charts
