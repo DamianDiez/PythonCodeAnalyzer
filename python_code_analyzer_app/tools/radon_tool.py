@@ -1,6 +1,8 @@
-import os
-import subprocess
+import os, json, subprocess
 from . import tools_status
+from .chart_class import Chart
+
+#a function to calculate fibonacci sucecion?
 
 class Radon_Tool:
 	def run(self, analysis_id, repository_path, tool_name):
@@ -28,3 +30,67 @@ class Radon_Tool:
 		finally:
 		    print("Radon_Tool.run() - Finalizado")
 		    return tools_status.FINISHED
+
+	def get_cc_charts(self, path_result):
+		print("Radon_Tool.get_cc_charts")
+		list_of_charts = []
+		path_to_file = path_result+"/result_cc.json"
+		if(not os.path.exists(path_to_file)):
+			return list_of_charts
+		ranks=[0,0,0,0,0,0]
+		labels = ["A","B","C","D","E","F"]
+		with open(path_to_file) as contenido:
+			clases = json.load(contenido)
+			for clase in clases:
+				values = clases[clase]
+				for value in values:
+					ranks[labels.index(value["rank"])]+=1
+		chart=Chart('Radon-CC', 0, Chart.DOUGHNUT, 'Radon - Cyclomatic Complexity', json.dumps(labels), ranks)
+		list_of_charts.append(chart)
+		return list_of_charts
+
+	def get_mi_charts(self, path_result):
+		print("Radon_Tool.get_mi_charts")
+		list_of_charts = []
+		path_to_file = path_result+"/result_mi.json"
+		if(not os.path.exists(path_to_file)):
+			return list_of_charts
+		files=[]
+		mis=[]
+		with open(path_to_file) as contenido:
+			datos = json.load(contenido)
+			for dato in datos:
+				files.append(dato.rsplit('\\', 1)[1])
+				values = datos[dato]
+				mis.append(values["mi"])
+				#mis.append(values.get("mi"))
+		chart=Chart('Radon-MI', 0, Chart.BAR, 'Radon - MI', json.dumps(files), mis)
+		list_of_charts.append(chart)
+		return list_of_charts
+
+	def get_raw_charts(self, path_result):
+		print("Radon_Tool.get_raw_charts")
+		list_of_charts = []
+		path_to_file = path_result+"/result_raw.json"
+		if(not os.path.exists(path_to_file)):
+			return list_of_charts
+		files=[]
+		comments=[]
+		with open(path_to_file) as contenido:
+			datos = json.load(contenido)
+			for dato in datos:
+				files.append(dato.rsplit('\\', 1)[1])
+				values = datos[dato]
+				comments.append(values["comments"])
+		chart=Chart('Radon-RAW', 0, Chart.BAR, 'Radon - MI', json.dumps(files), comments)
+		list_of_charts.append(chart)
+		return list_of_charts
+
+	def get_charts(self, path_result):
+
+		list_of_charts = []
+		list_of_charts += self.get_cc_charts(path_result)
+		list_of_charts += self.get_mi_charts(path_result)
+		list_of_charts += self.get_raw_charts(path_result)
+		
+		return list_of_charts
