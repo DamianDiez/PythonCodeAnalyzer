@@ -1,6 +1,6 @@
 {% extends 'python_code_analyzer_app/base.html' %}
 {% block page_header %}
- <h3>{{ repository }}</h3>
+ <h3 class="mb-3">{{ repository }}</h3>
 {% endblock page_header %}
 
 {% block content %}
@@ -9,7 +9,7 @@
 
 	{% for analisis in analyzes %}
 		<div class="card mb-3">
-			<h4 class="card-header">
+			<h4 class="card-header text-light" style="background-color: #212529;">
 				{{analisis}}
 				<small>
 					{% if analisis.status == 'PENDING' or analisis.status == 'RUNNING' %}
@@ -20,7 +20,7 @@
 					
  				</small>
  			</h4>
- 			<div class="card-body">
+ 			<div class="card-body text-dark">
  				{{ analisis.date_added|date:'M d, Y H:i' }} - {{ analisis.status }}
  			</div>
  		</div>

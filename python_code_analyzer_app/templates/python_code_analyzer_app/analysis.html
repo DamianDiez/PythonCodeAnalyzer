@@ -48,20 +48,29 @@
 </script>
 
 {% block content %}
-<p>Analysis: {{ analysis }}</p>
-<p>Status: {{ analysis.status }}</p>
-<p>Date: {{ analysis.date_added }}</p>
-<p>End Date: {{ analysis.date_finished }}</p>
+<div class="mb-2" style="color:white;">Analysis name: <span style="background-color: #5c5c5c">{{ analysis }}</span>
+Status: <span style="background-color: #5c5c5c">{{ analysis.status }}</span>
+Date: <span style="background-color: #5c5c5c">{{ analysis.date_added }}</span>
+End Date: <span style="background-color: #5c5c5c">{{ analysis.date_finished }}</span>
 {% if analysis.status == 'FINISHED' %}
-	<a href="{% url 'python_code_analyzer_app:analysis_result' analysis.id %}">Ver resultados</a>
+<a href="{% url 'python_code_analyzer_app:analysis_result' analysis.id %}" class="text-decoration-none">
+	View Results
+	<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+<path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"></path>
+<path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"></path>
+</svg>
+  </a>
+<!-- <a href="{% url 'python_code_analyzer_app:analysis_result' analysis.id %}" class="btn btn-primary"><i class="bi bi-download"></i> View Results</a> -->
 {% endif %}
+</div>
+<div class="mb-2"style="margin-top: 20;">
 {% for chart in list_of_charts %}
 	{% if chart.position|divisibleby:2 %}
 		<div class='row'>
 		
 			<div class='col-sm-6'>
 				<div class="card" style="margin-bottom: 20px;">
-				  <div class="card-header">
+				  <div class="card-header text-light" style="background-color: #212529;">
 				    {{ chart.label }}
 				  </div>
 				  <div class="card-body">
@@ -73,7 +82,7 @@
 	{% else %}
 		<div class='col-sm-6'>
 			<div class="card" style="margin-bottom: 20px;">
-			  <div class="card-header">
+			  <div class="card-header text-light" style="background-color: #212529;">
 			    {{ chart.label }}
 			  </div>
 			  <div class="card-body">
@@ -86,5 +95,6 @@
 {% empty %}
 	<li><h3>No results to show</h3></li>
 {% endfor %}
+</div>
 {% endblock content %}
 

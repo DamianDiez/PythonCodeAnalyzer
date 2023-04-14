@@ -10,8 +10,8 @@
      {% bootstrap_javascript jquery='full' %}
 </head>
 
-<body>
- <nav class="navbar navbar-expand-md navbar-light bg-light mb-4 border">
+<body class="text-light" style="background-color: #343a40;">
+ <nav class="navbar navbar-expand-md navbar-dark mb-0 border-dark">
     <a class="navbar-brand" href="{% url 'python_code_analyzer_app:index'%}">
         Python Code Analyzer</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse"
@@ -29,7 +29,7 @@
         <ul class="navbar-nav ml-auto">
             {% if user.is_authenticated %}
                 <li class="nav-item">
-                    <span class="navbar-text">Hello, {{ user.username }}.</span>
+                    <span class="navbar-text text-light">Hello, {{ user.username }}.</span>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'users:logout' %}">Log out</a>
@@ -45,8 +45,11 @@
         </ul>
     </div>
  </nav>
+ <div class="border-bottom mb-2">
+        
+ </div>
  <main role="main" class="container">
-    <div class="pb-2 mb-2 border-bottom">
+    <div>
         {% block page_header %}{% endblock page_header %}
     </div>
     <div>

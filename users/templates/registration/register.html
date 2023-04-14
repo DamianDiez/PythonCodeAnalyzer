@@ -1,11 +1,15 @@
 {% extends "python_code_analyzer_app/base.html" %}
+
+{% load bootstrap4 %}
+
 {% block content %}
  <form method="post" action="{% url 'users:register' %}">
  {% csrf_token %}
- {{ form.as_p }}
- 
- <button name="submit">Register</button>
- <input type="hidden" name="next" value="{% url 'python_code_analyzer_app:index' %}" />
+ {% bootstrap_form form %}
+ {% buttons %}
+    <button name="submit" class="btn btn-primary">Register</button>
+ {% endbuttons %}
+    <input type="hidden" name="next" value="{% url 'python_code_analyzer_app:index' %}" />
  </form>
  
 {% endblock content %}
