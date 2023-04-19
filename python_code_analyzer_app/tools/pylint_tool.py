@@ -2,7 +2,7 @@ import os, json
 from . import tools_status
 import pylint
 from pylint import lint
-from .chart_class import Chart
+from .chart_class import Chart, Cell
 
 
 
@@ -31,10 +31,8 @@ class Pylint_Tool:
 		    return tools_status.FINISHED
 
 	def __get_number_of_messages_by_type(self,datos):
-		print("get_amount_of_messages_by_type")
-		
 		tipos = [x['type'] for x in datos]
-		tipos=list(set(tipos))
+		tipos=sorted(list(set(tipos)),key=str.lower)
 		#cantidad de elementos de cada tipo
 		valores = []
 		for tipo in tipos:
@@ -43,10 +41,8 @@ class Pylint_Tool:
 		return chart
 
 	def __get_number_of_messages_by_symbol(self,datos):
-		print("get_amount_of_messages_by_type")
-		
 		symbols = [x['symbol'] for x in datos]
-		symbols=list(set(symbols))
+		symbols=sorted(list(set(symbols)),key=str.lower)
 		#cantidad de elementos de cada tipo
 		valores = []
 		for symbol in symbols:
@@ -57,28 +53,36 @@ class Pylint_Tool:
 		chart=Chart('Pylint-symbols', 1, Chart.PIE, 'Pylint - Tipos de mensaje', symbols, valores, display_legend)
 		return chart
 
-	def __get_number_of_msg_type_by_module(self, msg_type, datos):
-		print("get_amount_of_messages_by_type")
-		
-		modulos = [x['module'] for x in datos]
-		modulos=list(set(modulos))
+	def __get_number_of_msg_type_by_module(self, msg_type, datos, modulos):
 		#cantidad de elementos de cada tipo
 		valores = []
 		for modulo in modulos:
 		    valores.append( sum(x['type']==msg_type and x['module'] ==modulo for x in datos) )
-		chart=Chart(f"Pylint-{msg_type}-module", 1, Chart.BAR, f'Pylint - {msg_type}s by module', modulos, valores)
-		return chart
+		# chart=Chart(f"Pylint-{msg_type}-module", 1, Chart.BAR, f'Pylint - {msg_type}s by module', modulos, valores)
+		return valores
 
 	def __get_messages_by_module(self, datos):
 		charts = []
 		tipos = [x['type'] for x in datos]
-		tipos=list(set(tipos))
+		tipos=sorted(list(set(tipos)),key=str.lower);
+		modulos = [x['module'] for x in datos]
+		modulos=sorted(list(set(modulos)),key=str.lower);
+		all_values = []
 		for tipo in tipos:
-			charts.append(self.__get_number_of_msg_type_by_module(tipo,datos))
+			valores = self.__get_number_of_msg_type_by_module( tipo, datos, modulos)		
+			for i in range(len(modulos)):
+				all_values.append({"x": modulos[i], "y": tipo, "v": valores[i]})
+			
+			# chart=Chart(f"Pylint-{tipo}-module", 1, Chart.BAR, f'Pylint - {tipo}s by module', modulos, valores)
+			# charts.append(chart)
+		
+		
+		charts.insert(0,Chart(f"Pylint-heatmap-module", 1, Chart.MATRIX, f'Pylint - Heatmap by module', modulos, all_values, 'false', tipos))
+			
+
 		return charts
 
 	def get_charts(self, path_result):
-		print("Pylint_Tool.get_charts()")
 		list_of_charts = []
 		path_to_file = path_result+"/result.json"
 		if(not os.path.exists(path_to_file)):
@@ -86,9 +90,10 @@ class Pylint_Tool:
 
 		with open(path_to_file) as contenido:
 			datos = json.load(contenido)
+		
+		list_of_charts+=self.__get_messages_by_module(datos)
 		list_of_charts.append(self.__get_number_of_messages_by_type(datos))
 		list_of_charts.append(self.__get_number_of_messages_by_symbol(datos))
-		list_of_charts+=self.__get_messages_by_module(datos)
 		
 		return list_of_charts
 

@@ -5,42 +5,106 @@
 		var ctx;
 		var myChart;
 		{% for chart in list_of_charts %}
-			ctx = document.getElementById("{{chart.id}}").getContext('2d');
-			myChart = new Chart(ctx, {
-			    type: "{{chart.type}}",
-			    data: {
-			        labels: {{ chart.labels|safe }},
-			        datasets: [{
-			            label: "{{chart.label}}",
-			            data: {{ chart.data }}
-			            ,
-			            backgroundColor: [
-			                'rgba(255, 99, 132, 0.2)',
-			                'rgba(54, 162, 235, 0.2)',
-			                'rgba(255, 206, 86, 0.2)',
-			                'rgba(75, 192, 192, 0.2)',
-			                'rgba(153, 102, 255, 0.2)',
-			                'rgba(255, 159, 64, 0.2)'
-			            ],
-			            borderColor: [
-			                'rgba(255, 99, 132, 1)',
-			                'rgba(54, 162, 235, 1)',
-			                'rgba(255, 206, 86, 1)',
-			                'rgba(75, 192, 192, 1)',
-			                'rgba(153, 102, 255, 1)',
-			                'rgba(255, 159, 64, 1)'
-			            ],
-			            borderWidth: 1
-			        }]
-			    },
-			    options: {
-			        plugins: {
-			            legend: {
-			                display: {{chart.display_legend}}
-			            }
-			        }
-			    }
-			});
+			{% if chart.type == 'matrix' %}
+				ctx = document.getElementById("{{chart.id}}").getContext('2d');
+				myChart = new Chart(ctx, {
+					type: 'matrix',
+					
+					data: {
+						datasets: [{
+						data: {{ chart.data|safe }},
+						backgroundColor: function (context) {
+							var value = context.dataset.data[context.dataIndex].v;
+							var msgType = context.dataset.data[context.dataIndex].y;
+							let alpha = 2 * value / 50.0;
+							if(msgType == 'warning')
+								return `rgba(0,200,0,${alpha})`;
+							if(msgType == 'refactor')
+								return `rgba(255,255,0,${alpha})`;
+							if(msgType == 'convention')
+								return `rgba(0,0,200,${alpha})`;
+							return `rgba(255,0,0,${alpha})`;
+						},
+						borderWidth: 0,
+						borderColor: '#fff',
+						width: ({chart}) => (chart.chartArea || {}).width / {{ chart.xLabels|safe }}.length - 1,
+						height: ({chart}) => (chart.chartArea || {}).height / {{ chart.yLabels|safe }}.length - 1,
+						}]
+					},
+					options: {
+						scales:{
+							x:{
+								labels: {{ chart.xLabels|safe }},
+								type: 'category',
+								grid: {
+									display: false,
+									drawBorder: false,
+									tickLength: 0
+								}
+							},
+							y:{
+								labels: {{ chart.yLabels|safe }},
+								type: 'category',
+								offset: true,
+								grid: {
+									display: false,
+									drawBorder: false,
+									tickLength: 0
+								}
+							}
+						},
+						plugins: {
+							legend: {
+								display: false
+							},
+							tooltip: {
+								callbacks: {
+									label: function(tooltipItem, data) {
+										return tooltipItem.raw.v == null ? ' 0' : ' '+tooltipItem.raw.v+' '+tooltipItem.raw.y+'s';
+									}
+								}
+							}
+						}
+					}
+				});
+			{% else %}
+				ctx = document.getElementById("{{chart.id}}").getContext('2d');
+				myChart = new Chart(ctx, {
+					type: "{{chart.type}}",
+					data: {
+						labels: {{ chart.xLabels|safe }},
+						datasets: [{
+							label: "{{chart.label}}",
+							data: {{ chart.data|safe }}
+							,
+							backgroundColor: [
+								'rgba(255, 99, 132, 0.2)',
+								'rgba(54, 162, 235, 0.2)',
+								'rgba(255, 206, 86, 0.2)',
+								'rgba(75, 192, 192, 0.2)',
+								'rgba(153, 102, 255, 0.2)',
+								'rgba(255, 159, 64, 0.2)'
+							],
+							borderColor: [
+								'rgba(255, 99, 132, 1)',
+								'rgba(54, 162, 235, 1)',
+								'rgba(255, 206, 86, 1)',
+								'rgba(75, 192, 192, 1)',
+								'rgba(153, 102, 255, 1)',
+								'rgba(255, 159, 64, 1)'
+							],
+							borderWidth: 1
+						}]
+					},
+					options: {
+						plugins: {
+							legend: {
+								display: {{chart.display_legend}}
+							}
+						}
+					}
+				});
+			{% endif %}
 		{% empty %}
 			<li><h3>No repositories have been added yet.</h3></li>
 		{% endfor %}
@@ -54,13 +118,13 @@ Date: <span style="background-color: #5c5c5c">{{ analysis.date_added }}</span>
 End Date: <span style="background-color: #5c5c5c">{{ analysis.date_finished }}</span>
 {% if analysis.status == 'FINISHED' %}
 <a href="{% url 'python_code_analyzer_app:analysis_result' analysis.id %}" class="text-decoration-none">
-	View Results
+	Download Results
 	<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
 <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"></path>
 <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"></path>
 </svg>
   </a>
-<!-- <a href="{% url 'python_code_analyzer_app:analysis_result' analysis.id %}" class="btn btn-primary"><i class="bi bi-download"></i> View Results</a> -->
+
 {% endif %}
 </div>
 <div class="mb-2"style="margin-top: 20;">

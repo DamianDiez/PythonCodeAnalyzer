@@ -8,6 +8,8 @@
      <title>Python Code Analyzer</title>
      {% bootstrap_css %}
      {% bootstrap_javascript jquery='full' %}
+     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.1"></script>
 </head>
 
 <body class="text-light" style="background-color: #343a40;">
@@ -56,7 +58,7 @@
         {% block content %}{% endblock content %}
     </div>
  </main>
- <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+ 
  <script type="text/javascript">
      $(document).ready(function(){
         {% block jquery %} {% endblock %}

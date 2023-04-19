@@ -82,7 +82,7 @@ class Radon_Tool:
 				files.append(dato.rsplit('\\', 1)[1])
 				values = datos[dato]
 				comments.append(values["comments"])
-		chart=Chart('Radon-RAW', 0, Chart.BAR, 'Radon - MI', json.dumps(files), comments)
+		chart=Chart('Radon-RAW', 0, Chart.BAR, 'Radon - RAW', json.dumps(files), comments)
 		list_of_charts.append(chart)
 		return list_of_charts
 
