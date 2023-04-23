@@ -16,13 +16,14 @@
 		var color;
 		var value;
 		{% for indicator in list_of_indicators %}
+			div = document.getElementById("{{indicator.id}}");
 			{% if indicator.type == 'rating' %}
 				// Obtener el div por su id
-				div = document.getElementById("{{indicator.id}}");
-				value = {{indicator.value}};
 				color = getColor( {{indicator.value}} ,{{indicator.bad}}, {{indicator.regular}}, {{indicator.good}});
 				// Insertar el código HTML dentro del div
 				div.innerHTML = `<h1><span style="color: ${color};">{{indicator.value}}</span>/10</h1>`;
+			{% else %}
+				div.innerHTML = `<h1>{{indicator.value}}</h1>`;
 			{% endif %}
 		{% endfor %}
 		var ctx;

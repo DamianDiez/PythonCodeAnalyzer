@@ -1,6 +1,7 @@
 class Indicator:
     """Indicator class"""
     RATING="rating"
+    DEFAULT="default"
 
     def __init__(self, _id, _title, _size, _value, _type, _max, _bad, _regular,_good):
         """init"""

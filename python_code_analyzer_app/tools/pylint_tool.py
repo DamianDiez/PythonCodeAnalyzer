@@ -201,5 +201,10 @@ class Pylint_Tool:
 		
 		rating = datos['rating']
 		list_of_indicators.append(Indicator("pylint-rating", "Rating", 3, rating["current"], Indicator.RATING, 10, 4.0, 7.0, 9.0))
+		details = datos['details']
+		modulos = [x['module'] for x in details]
+		modulos=sorted(list(set(modulos)),key=str.lower);
+		print(modulos)
+		list_of_indicators.append(Indicator("pylint-modules", "# of Modules", 3, len(modulos), Indicator.DEFAULT, 10, 4.0, 7.0, 9.0))
 		
 		return list_of_indicators
