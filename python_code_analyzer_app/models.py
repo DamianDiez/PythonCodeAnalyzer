@@ -108,6 +108,13 @@ class Tool(models.Model):
         tool_class = globals()[self.class_name]()
         path_result=repository.path+f"_result/Analisis{analysis.id}/{self.name}"
         return tool_class.get_charts(path_result)
+    
+    def get_indicators(self, analysis_tool):
+        analysis = Analysis.objects.get(id=analysis_tool.analysis.id)
+        repository = Repository.objects.get(id=analysis.repository_id)
+        tool_class = globals()[self.class_name]()
+        path_result=repository.path+f"_result/Analisis{analysis.id}/{self.name}"
+        return tool_class.get_indicators(path_result)
 
 class Analysis(models.Model):
     """Analisis de un repositorio"""
@@ -168,9 +175,18 @@ class Analysis(models.Model):
         charts=[]
         for tool in tools:
             charts += tool.get_charts()
-        for index in range(len(charts)):
-            charts[index].position=index
+        # for index in range(len(charts)):
+        #     charts[index].position=index
         return charts
+    
+    def get_indicators(self):
+        tools = self.analysistool_set.all()
+        indicators=[]
+        for tool in tools:
+            indicators += tool.get_indicators()
+        # for index in range(len(indicators)):
+        #     indicators[index].position=index
+        return indicators
 
 class AnalysisTool(models.Model):
     analysis = models.ForeignKey(Analysis, on_delete=models.CASCADE)
@@ -191,6 +207,10 @@ class AnalysisTool(models.Model):
     def get_charts(self):
         charts = self.tool.get_charts(self)
         return charts
+    
+    def get_indicators(self):
+        indicators = self.tool.get_indicators(self)
+        return indicators
 
 class CeleryTaskSignal(models.Model):   
     CANCEL_TASK = 'cancel_task'

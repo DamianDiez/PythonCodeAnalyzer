@@ -43,10 +43,10 @@ def excecute_analysis(analysis_id):
     #seteo el commit
     analysis.set_commit(commit)
 
-    if analysis.was_excecuted():
-        status_msg=f'excecute_analysis - an analysis for this commit ({commit}) was executed previously...'
-        analysis.cancel(status_msg)
-        return False
+    # if analysis.was_excecuted():
+    #     status_msg=f'excecute_analysis - an analysis for this commit ({commit}) was executed previously...'
+    #     analysis.cancel(status_msg)
+    #     return False
 
     print(f"excecute_analysis - run - analysis: {analysis} ")
     if (CeleryTaskSignal.is_task_cancelled(analysis)):

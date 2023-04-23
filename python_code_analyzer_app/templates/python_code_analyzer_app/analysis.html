@@ -1,7 +1,30 @@
 {% extends 'python_code_analyzer_app/base.html' %}
 
 <script type="text/javascript">
+	
 	{% block jquery %}
+	function getColor(value, bad, regular, good){
+		if(value < bad)
+			return "red"
+		if(value < regular)
+			return "orange"
+		if(value < good)
+			return "yellow"
+		return "green"
+	}
+		var div;
+		var color;
+		var value;
+		{% for indicator in list_of_indicators %}
+			{% if indicator.type == 'rating' %}
+				// Obtener el div por su id
+				div = document.getElementById("{{indicator.id}}");
+				value = {{indicator.value}};
+				color = getColor( {{indicator.value}} ,{{indicator.bad}}, {{indicator.regular}}, {{indicator.good}});
+				// Insertar el código HTML dentro del div
+				div.innerHTML = `<h1><span style="color: ${color};">{{indicator.value}}</span>/10</h1>`;
+			{% endif %}
+		{% endfor %}
 		var ctx;
 		var myChart;
 		{% for chart in list_of_charts %}
@@ -128,37 +151,55 @@ End Date: <span style="background-color: #5c5c5c">{{ analysis.date_finished }}</
 {% endif %}
 </div>
 <div class="mb-2"style="margin-top: 20;">
-{% for chart in list_of_charts %}
-	{% if chart.position|divisibleby:2 %}
-		<div class='row'>
-		
-			<div class='col-sm-6'>
+	
+	<div class='row'>
+		{% for indicator in list_of_indicators %}
+			<div class='col-sm-{{indicator.size}}'>
 				<div class="card" style="margin-bottom: 20px;">
-				  <div class="card-header text-light" style="background-color: #212529;">
-				    {{ chart.label }}
-				  </div>
-				  <div class="card-body">
-					<canvas id="{{ chart.id }}" width="400" height="400"></canvas>    
-				  </div>
+					<div class="card-header text-light" style="background-color: #212529;">
+						{{ indicator.title }}
+					</div>
+					<div class="card-body text-dark text-center">
+						<div id="{{ indicator.id }}"></div>
+					</div>
 				</div>
 			</div>
-		
-	{% else %}
-		<div class='col-sm-6'>
+		{% endfor %}
+		<!-- <div class='col-sm-3'>
 			<div class="card" style="margin-bottom: 20px;">
 			  <div class="card-header text-light" style="background-color: #212529;">
-			    {{ chart.label }}
+				# of Modules
 			  </div>
-			  <div class="card-body">
-				<canvas id="{{ chart.id }}" width="400" height="400"></canvas>    
+			  <div class="card-body text-dark text-center">
+				<h1>8</h1>
 			  </div>
 			</div>
 		</div>
+		<div class='col-sm-3'>
+			<div class="card" style="margin-bottom: 20px;">
+			  <div class="card-header text-light" style="background-color: #212529;">
+				# of Lines
+			  </div>
+			  <div class="card-body text-dark text-center">
+				<h1>1687</h1>
+			  </div>
+			</div>
+		</div> -->
 	</div>
-	{% endif %}
-{% empty %}
-	<li><h3>No results to show</h3></li>
-{% endfor %}
+	<div class='row'>
+	{% for chart in list_of_charts %}
+		<div class="col-sm-{{chart.size}}">
+			<div class="card" style="margin-bottom: 20px;">
+				<div class="card-header text-light" style="background-color: #212529;">
+				{{ chart.label }}
+				</div>
+				<div class="card-body">
+				<canvas id="{{ chart.id }}" width="400" height="{{ chart.height }}"></canvas>    
+				</div>
+			</div>
+		</div>
+	{% endfor %}
+	</div>
 </div>
 {% endblock content %}
 

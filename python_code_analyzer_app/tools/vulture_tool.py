@@ -58,3 +58,7 @@ class Vulture_Tool:
 		# chart=Chart('chart1', 0, 'pie', 'Cyclomatic Complexity', json.dumps(["A","B","C","D","E","F"]), ranks)
 		# list_of_charts.append(chart)
 		return list_of_charts
+	
+	def get_indicators(self, path_result):
+		list_of_indicators = []
+		return list_of_indicators

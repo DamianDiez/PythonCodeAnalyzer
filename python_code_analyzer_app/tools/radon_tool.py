@@ -45,7 +45,7 @@ class Radon_Tool:
 				values = clases[clase]
 				for value in values:
 					ranks[labels.index(value["rank"])]+=1
-		chart=Chart('Radon-CC', 0, Chart.DOUGHNUT, 'Radon - Cyclomatic Complexity', json.dumps(labels), ranks)
+		chart=Chart('Radon-CC', 6, Chart.DOUGHNUT, 'Cyclomatic Complexity', json.dumps(labels), ranks)
 		list_of_charts.append(chart)
 		return list_of_charts
 
@@ -64,7 +64,7 @@ class Radon_Tool:
 				values = datos[dato]
 				mis.append(values["mi"])
 				#mis.append(values.get("mi"))
-		chart=Chart('Radon-MI', 0, Chart.BAR, 'Radon - MI', json.dumps(files), mis)
+		chart=Chart('Radon-MI', 6, Chart.BAR, 'Radon - MI', json.dumps(files), mis)
 		list_of_charts.append(chart)
 		return list_of_charts
 
@@ -82,7 +82,7 @@ class Radon_Tool:
 				files.append(dato.rsplit('\\', 1)[1])
 				values = datos[dato]
 				comments.append(values["comments"])
-		chart=Chart('Radon-RAW', 0, Chart.BAR, 'Radon - RAW', json.dumps(files), comments)
+		chart=Chart('Radon-RAW', 6, Chart.BAR, 'Radon - RAW', json.dumps(files), comments)
 		list_of_charts.append(chart)
 		return list_of_charts
 
@@ -94,3 +94,7 @@ class Radon_Tool:
 		list_of_charts += self.get_raw_charts(path_result)
 		
 		return list_of_charts
+	
+	def get_indicators(self, path_result):
+		list_of_indicators = []
+		return list_of_indicators

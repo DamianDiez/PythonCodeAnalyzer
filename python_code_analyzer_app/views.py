@@ -130,11 +130,12 @@ def analysis(request, analysis_id):
     analysis = Analysis.objects.get(id=analysis_id)
     repository = Repository.objects.get(id=analysis.repository_id)
     analysis_path = repository.path+"_result" +"/"+f"Analisis{analysis_id}"
+    indicators=analysis.get_indicators()
     result_list=analysis.get_charts()
     list_of_charts=list_of_charts + result_list
     for x in list_of_charts:
         print(x.label)
-    context = {'analysis': analysis, 'list_of_charts': list_of_charts}
+    context = {'analysis': analysis, 'list_of_charts': list_of_charts, 'list_of_indicators': indicators}
     return render(request, 'python_code_analyzer_app/analysis.html', context)
 
 @login_required
