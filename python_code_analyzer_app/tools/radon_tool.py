@@ -1,6 +1,7 @@
 import os, json, subprocess
 from . import tools_status
 from .chart_class import Chart
+from .indicator_class import Indicator
 
 #a function to calculate fibonacci sucecion?
 
@@ -97,4 +98,27 @@ class Radon_Tool:
 	
 	def get_indicators(self, path_result):
 		list_of_indicators = []
+
+		print("Radon_Tool.get_raw_charts")
+		list_of_charts = []
+		path_to_file = path_result+"/result_raw.json"
+		if(not os.path.exists(path_to_file)):
+			return list_of_charts
+		files=[]
+		comments=[]
+		totalLOC=0
+		totalComments=0
+		with open(path_to_file) as contenido:
+			datos = json.load(contenido)
+			for dato in datos:
+				files.append(dato.rsplit('\\', 1)[1])
+				values = datos[dato]
+				print(values)
+				comments.append(values["comments"])
+				totalLOC+=values["loc"]
+				totalComments+=values["multi"] + values["single_comments"]
+				
+
+		list_of_indicators.append(Indicator("radon-line-of-code", "# of lines of Code", 3, totalLOC, Indicator.DEFAULT, 0, 0, 0, 0))
+		list_of_indicators.append(Indicator("radon-line-of-comments", "# of lines of Comments", 3, totalComments, Indicator.DEFAULT, 0, 0, 0, 0))
 		return list_of_indicators
