@@ -3,6 +3,7 @@ import subprocess
 import contextlib
 import vulture
 from . import tools_status
+from .indicator_class import Indicator
 
 class Vulture_Tool:
 	def run(self, analysis_id, repository_path, tool_name):
@@ -61,4 +62,15 @@ class Vulture_Tool:
 	
 	def get_indicators(self, path_result):
 		list_of_indicators = []
+		path_to_file = path_result+"/result.txt"
+		if(not os.path.exists(path_to_file)):
+			return list_of_indicators
+		totalUnusedItems=0
+		with open(path_to_file) as contenido:
+			lines = contenido.readlines()
+			totalUnusedItems = len(lines)
+				
+
+		list_of_indicators.append(Indicator("vulture-unused-items", "# of Usused Items", 3, totalUnusedItems, Indicator.DEFAULT, 0, 0, 0, 0))
+		#list_of_indicators.append(Indicator("radon-line-of-comments", "# of lines of Comments", 3, totalComments, Indicator.DEFAULT, 0, 0, 0, 0))
 		return list_of_indicators
