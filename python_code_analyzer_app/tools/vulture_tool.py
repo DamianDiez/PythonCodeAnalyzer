@@ -1,8 +1,8 @@
-import os
-import subprocess
+import os, json
 import contextlib
 import vulture
 from . import tools_status
+from .chart_class import Chart
 from .indicator_class import Indicator
 
 class Vulture_Tool:
@@ -35,29 +35,19 @@ class Vulture_Tool:
 
 	def get_charts(self, path_result):
 		list_of_charts = []
-		# path_result = path_to_file+"/Radon/result_cc.json"
-		# ranks=[0,0,0,0,0,0]
-		# with open(path_result) as contenido:
-		#     clases = json.load(contenido)
-		#     for clase in clases:
-		#         values = clases[clase]
-		#         # print(values)
-		#         for value in values:
-		#             _type=value["type"]
-		#             if(value["rank"]=='A'):
-		#                 ranks[0]+=1
-		#             if(value["rank"]=='B'):
-		#                 ranks[1]+=1
-		#             if(value["rank"]=='C'):
-		#                 ranks[2]+=1
-		#             if(value["rank"]=='D'):
-		#                 ranks[3]+=1
-		#             if(value["rank"]=='E'):
-		#                 ranks[4]+=1
-		#             if(value["rank"]=='F'):
-		#                 ranks[5]+=1
-		# chart=Chart('chart1', 0, 'pie', 'Cyclomatic Complexity', json.dumps(["A","B","C","D","E","F"]), ranks)
-		# list_of_charts.append(chart)
+		path_to_file = path_result+"/result.txt"
+		if(not os.path.exists(path_to_file)):
+			return list_of_charts
+		messages=["unused method","unused variable","unused attribute","unused class","unused import","unused function"]
+		counter = {message: 0 for message in messages}
+		with open(path_to_file, 'r') as archivo:
+			for line in archivo:
+				for message in messages:
+					if message in line:
+						counter[message] += 1
+		
+		list_of_charts.append(Chart('Vulture-Unused-Items', 6, Chart.BAR, 'Unused Items', json.dumps(messages), counter))
+				
 		return list_of_charts
 	
 	def get_indicators(self, path_result):
