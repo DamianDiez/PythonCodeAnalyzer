@@ -185,7 +185,7 @@ class Pylint_Tool:
 		details = datos['details']
 		list_of_charts+=self.__get_messages_by_module(details)
 		list_of_charts.append(self.__get_number_of_messages_by_type(details))
-		list_of_charts.append(self.__get_number_of_messages_by_symbol(details))
+		#list_of_charts.append(self.__get_number_of_messages_by_symbol(details))
 		
 		return list_of_charts
 
