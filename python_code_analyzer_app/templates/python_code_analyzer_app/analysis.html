@@ -18,9 +18,7 @@
 		{% for indicator in list_of_indicators %}
 			div = document.getElementById("{{indicator.id}}");
 			{% if indicator.type == 'rating' %}
-				// Obtener el div por su id
 				color = getColor( {{indicator.value}} ,{{indicator.bad}}, {{indicator.regular}}, {{indicator.good}});
-				// Insertar el código HTML dentro del div
 				div.innerHTML = `<h1><span style="color: ${color};">{{indicator.value}}</span>/10</h1>`;
 			{% else %}
 				div.innerHTML = `<h1>{{indicator.value}}</h1>`;
@@ -135,22 +133,22 @@
 	{% endblock %}
 </script>
 
-{% block content %}
-<div class="mb-2" style="color:white;">Analysis name: <span style="background-color: #5c5c5c">{{ analysis }}</span>
-Status: <span style="background-color: #5c5c5c">{{ analysis.status }}</span>
-Date: <span style="background-color: #5c5c5c">{{ analysis.date_added }}</span>
-End Date: <span style="background-color: #5c5c5c">{{ analysis.date_finished }}</span>
-{% if analysis.status == 'FINISHED' %}
-<a href="{% url 'python_code_analyzer_app:analysis_result' analysis.id %}" class="text-decoration-none">
-	Download Results
-	<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
-<path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"></path>
-<path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"></path>
-</svg>
-  </a>
+{% block page_header %}
+<nav class="navbar navbar-dark bg-dark">
+	<span class="navbar-brand mb-0">Analysis name: <span style="background-color: #5c5c5c">{{ analysis }}</span></span>
+	<span class="navbar-brand mb-0 ">Status: <span style="background-color: #5c5c5c">{{ analysis.status }}</span></span>
+	<span class="navbar-brand mb-0 ">Date: <span style="background-color: #5c5c5c">{{ analysis.date_added }}</span></span>
+	<span class="navbar-brand mb-0 ">End Date: <span style="background-color: #5c5c5c">{{ analysis.date_finished }}</span></span>
+	{% if analysis.status == 'FINISHED' %}
+		<form class="form-inline">
+			<a  href="{% url 'python_code_analyzer_app:analysis_result' analysis.id %}"  class="btn btn-dark" title="Download results"><i class="fa fa-download"></i></a>
+		</form>
+	{% endif %}
+  </nav>
 
-{% endif %}
-</div>
+{% endblock page_header %}
+{% block content %}
+
 <div class="mb-2"style="margin-top: 20;">
 	
 	<div class='row'>
