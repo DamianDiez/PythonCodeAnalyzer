@@ -4,44 +4,74 @@
 {% endblock page_header %}
 
 {% block content %}
-
-<!-- <p>Analyzes:</p> -->
-
-	{% for analisis in analyzes %}
-		<div class="card mb-3">
-			<h4 class="card-header text-light" style="background-color: #212529;">
-				{{analisis}}
-				<small>
-					{% if analisis.status == 'PENDING' or analisis.status == 'RUNNING' %}
-						<a href="{% url 'python_code_analyzer_app:cancel_analysis' analisis.id %}">Cancel</a>
-					{% else %}
-						<a href="{% url 'python_code_analyzer_app:analysis' analisis.id %}">View</a>
-					{% endif %}	
-					
- 				</small>
- 			</h4>
- 			<div class="card-body text-dark">
- 				{{ analisis.date_added|date:'M d, Y H:i' }} - {{ analisis.status }}
- 			</div>
- 		</div>
-	{% empty %}
-		<p>There are no analyzes for this repository yet.</p>
-	{% endfor %}
-
-	<br/><br/>
+	<table class="table">
+		<thead class="thead-dark">
+		  <tr>
+			<th>Name</th>
+			<th>Date</th>
+			<th>Status</th>
+			<th>Actions</th>
+		  </tr>
+		</thead>
+		<tbody>
+		{% for analisis in analyzes %}
+		<tr class="text-light">
+			<td>{{ analisis }}</td>
+			<td>{{ analisis.date_added|date:'M d, Y H:i' }}</td>
+			<td>{{ analisis.status }}</td>
+			<td>
+				{% if analisis.status == 'PENDING' or analisis.status == 'RUNNING' %}
+					<a href="{% url 'python_code_analyzer_app:cancel_analysis' analisis.id %}">Cancel</a>
+				{% else %}
+					<a href="{% url 'python_code_analyzer_app:analysis' analisis.id %}">View</a>
+				{% endif %}	
+				
+			</td>
+		</tr>
+		{% empty %}
+			<tr>
+				<td colspan="4">There are no analyzes for this repository yet.</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
 	<!-- pagination -->
-	{% if analyzes.has_previous %}
-		<a href="?page=1">&laquo First</a>
-		<a href="?page={{ analyzes.previous_page_number }}">Previous</a>
-	{% endif %}
-
-	Page {{analyzes.number}} of {{ analyzes.paginator.num_pages }}
-
-	{% if analyzes.has_next %}
-		<a href="?page={{ analyzes.next_page_number}}">Next</a>
-		<a href="?page={{ analyzes.paginator.num_pages }}">Last &raquo </a>
-	{% endif %}
+	<nav class="d-flex justify-content-center" aria-label="Page navigation example">
+		<ul class="pagination">
+		  {% if analyzes.has_previous %}
+			<li class="page-item">
+			  <a class="page-link" href="?page={{ analyzes.previous_page_number }}">Previous</a>
+			</li>
+		  {% else %}
+			<li class="page-item disabled">
+			  <a class="page-link" href="#">Previous</a>
+			</li>
+		  {% endif %}
 	
+		  {% for num in analyzes.paginator.page_range %}
+			{% if analyzes.number == num %}
+			  <li class="page-item active">
+				<a class="page-link" href="#">{{ num }} <span class="sr-only">(current)</span></a>
+			  </li>
+			{% else %}
+			  <li class="page-item">
+				<a class="page-link" href="?page={{ num }}">{{ num }}</a>
+			  </li>
+			{% endif %}
+		  {% endfor %}
+	
+		  {% if analyzes.has_next %}
+			<li class="page-item">
+			  <a class="page-link" href="?page={{ analyzes.next_page_number }}">Next</a>
+			</li>
+		  {% else %}
+			<li class="page-item disabled">
+			  <a class="page-link" href="#">Next</a>
+			</li>
+		  {% endif %}
+		</ul>
+	  </nav>
+	<br/><br/>
 	<p>
 		<a href="{% url 'python_code_analyzer_app:new_analysis' repository.id %}">Add new analysis</a>
 	</p>
