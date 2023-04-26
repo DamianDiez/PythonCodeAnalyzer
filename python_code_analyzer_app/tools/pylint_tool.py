@@ -128,7 +128,7 @@ class Pylint_Tool:
 		valores = []
 		for tipo in tipos:
 		    valores.append( sum(x['type']==tipo for x in datos) )
-		chart=Chart('Pylint-types', 6, Chart.BAR, 'Pylint - Tipos de mensaje', tipos, valores)
+		chart=Chart('Pylint-types', 6, Chart.BAR, '# of Messages by Type', tipos, valores)
 		return chart
 
 	def __get_number_of_messages_by_symbol(self,datos):
@@ -168,7 +168,7 @@ class Pylint_Tool:
 			# charts.append(chart)
 		
 		
-		charts.insert(0,Chart(f"Pylint-heatmap-module", 12, Chart.MATRIX, f'Pylint - Heatmap by module', modulos, all_values,100, 'false', tipos))
+		charts.insert(0,Chart(f"Pylint-heatmap-module", 12, Chart.MATRIX, f'Heatmap by Module', modulos, all_values,100, 'false', tipos))
 			
 
 		return charts

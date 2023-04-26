@@ -65,7 +65,7 @@ class Radon_Tool:
 				values = datos[dato]
 				mis.append(values["mi"])
 				#mis.append(values.get("mi"))
-		chart=Chart('Radon-MI', 6, Chart.BAR, 'Modificability Index by Module', json.dumps(files), mis)
+		chart=Chart('Radon-MI', 12, Chart.BAR, 'Modificability Index by Module', json.dumps(files), mis, 150)
 		list_of_charts.append(chart)
 		return list_of_charts
 
