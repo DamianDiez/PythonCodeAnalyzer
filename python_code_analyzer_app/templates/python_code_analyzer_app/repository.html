@@ -30,10 +30,9 @@
 					<a href="{% url 'python_code_analyzer_app:cancel_analysis' analysis.id %}" class="btn btn-dark" title="Cancel"><i class="fa fa-times"></i></a>
 				{% else %}
 					<a href="{% url 'python_code_analyzer_app:analysis' analysis.id %}" class="btn btn-dark" title="View results"><i class="fa fa-eye"></i></a>
-					<form action="{% url 'python_code_analyzer_app:delete_analysis' analysis.id %}" method="post">
-						{% csrf_token %}
-						<button class="btn btn-dark" type="submit" title="Delete"><i class="fa fa-trash"></i></button>
-					</form>
+					<button class="btn btn-dark delete-btn" data-url="{% url 'python_code_analyzer_app:delete_analysis' analysis.id %}" title="Delete">
+						<i class="fa fa-trash"></i>
+					</button>
 				{% endif %}	
 				
 				</div>
