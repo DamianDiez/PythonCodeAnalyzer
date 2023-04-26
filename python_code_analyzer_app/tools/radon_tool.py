@@ -1,4 +1,4 @@
-import os, json, subprocess
+import os, json, subprocess, re
 from . import tools_status
 from .chart_class import Chart
 from .indicator_class import Indicator
@@ -14,13 +14,13 @@ class Radon_Tool:
 		path_result = os.path.join(repository_path+"_result",f"Analisis{analysis_id}",f"{tool_name}")
 		if not os.path.exists(path_result):
 		    os.makedirs(path_result)
-		file_result_cc = os.path.join(path_result,"result_cc.json")
+		file_result_cc = os.path.join(path_result,"result_cc.txt")
 		file_result_mi = os.path.join(path_result,"result_mi.json")
 		file_result_raw = os.path.join(path_result,"result_raw.json")
 
 		try:
 		    with open(file_result_cc,"wb") as out:
-		        result = subprocess.run(["radon","cc", '-s', '-j', repository_path], stdout=out, shell=True)
+		        result = subprocess.run(["radon","cc", '-s', '-a', repository_path], stdout=out, shell=True)
 		    with open(file_result_mi,"wb") as out:
 		        result = subprocess.run(["radon","mi", '-s', '-j', repository_path], stdout=out, shell=True)
 		    with open(file_result_raw,"wb") as out:
@@ -65,7 +65,7 @@ class Radon_Tool:
 				values = datos[dato]
 				mis.append(values["mi"])
 				#mis.append(values.get("mi"))
-		chart=Chart('Radon-MI', 6, Chart.BAR, 'Radon - MI', json.dumps(files), mis)
+		chart=Chart('Radon-MI', 6, Chart.BAR, 'Modificability Index by Module', json.dumps(files), mis)
 		list_of_charts.append(chart)
 		return list_of_charts
 
@@ -92,11 +92,11 @@ class Radon_Tool:
 		list_of_charts = []
 		list_of_charts += self.get_cc_charts(path_result)
 		list_of_charts += self.get_mi_charts(path_result)
-		list_of_charts += self.get_raw_charts(path_result)
+		#list_of_charts += self.get_raw_charts(path_result)
 		
 		return list_of_charts
 	
-	def get_indicators(self, path_result):
+	def _get_raw_indicators(self, path_result):
 		list_of_indicators = []
 		path_to_file = path_result+"/result_raw.json"
 		if(not os.path.exists(path_to_file)):
@@ -111,8 +111,33 @@ class Radon_Tool:
 				comments.append(values["comments"])
 				totalLOC+=values["loc"]
 				totalComments+=values["multi"] + values["single_comments"]
-				
 
 		list_of_indicators.append(Indicator("radon-line-of-code", "# of lines of Code", 3, totalLOC, Indicator.DEFAULT, 0, 0, 0, 0))
-		#list_of_indicators.append(Indicator("radon-line-of-comments", "# of lines of Comments", 3, totalComments, Indicator.DEFAULT, 0, 0, 0, 0))
+		list_of_indicators.append(Indicator("radon-line-of-comments", "# of lines of Comments", 3, totalComments, Indicator.DEFAULT, 0, 0, 0, 0))
+		
+		return list_of_indicators
+	
+	def _get_cc_indicators(self, path_result):
+		list_of_indicators = []
+		path_to_file = path_result+"/result_cc.txt"
+
+		with open(path_to_file, "r") as f:
+			content = f.read()
+
+		match = re.search(r"Average complexity: ([A-Z]) \((\d+\.\d+)\)", content)
+		if match:
+			rank = match.group(1)
+			value = round(float(match.group(2)), 2)
+			# list_of_indicators.append(Indicator("radon-cyclomatic-complexity", "Cyclomatic Complexity", 3, '<h1 style="color: red;">'+rank+' ('+str(value)+')<h1>' , "color: red;"))
+			list_of_indicators.append(Indicator("radon-cyclomatic-complexity", "Cyclomatic Complexity", 3, rank+' ('+str(value)+')', Indicator.DEFAULT, 0, 0, 0, 0))
+		
+		return list_of_indicators
+
+	def get_indicators(self, path_result):
+		list_of_indicators = []
+		
+				
+		list_of_indicators+=self._get_raw_indicators(path_result)
+		list_of_indicators+=self._get_cc_indicators(path_result)
+		
 		return list_of_indicators
