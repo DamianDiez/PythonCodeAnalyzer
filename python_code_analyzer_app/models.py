@@ -151,7 +151,6 @@ class Analysis(models.Model):
             self.status = tools_status.FAILED
         else:
             path_result = os.path.join(self.repository.path+"_result",f"Analisis{self.id}")
-            filename = "result"
             format = "zip"
             shutil.make_archive(path_result, format, path_result)
             self.status = tools_status.FINISHED
@@ -161,6 +160,14 @@ class Analysis(models.Model):
         self.status = tools_status.CANCELLED
         self.status_msg=status_msg
         self.save()
+
+    def delete_files(self):
+        path_result = os.path.join(self.repository.path+"_result",f"Analisis{self.id}")
+        path_result_zip = os.path.join(self.repository.path+"_result",f"Analisis{self.id}.zip")
+        if os.path.isdir(path_result):
+            shutil.rmtree(path_result)
+        if os.path.isfile(path_result_zip):
+            os.remove(path_result_zip)
 
     def set_commit(self,commit):
         self.commit=commit

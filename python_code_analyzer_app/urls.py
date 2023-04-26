@@ -24,4 +24,6 @@ urlpatterns = [
     path('analysis_result/<int:analysis_id>/', views.analysis_result, name='analysis_result'),
     # Cancel a single analysis.
     path('cancel_analysis/<int:analysis_id>/', views.cancel_analysis, name='cancel_analysis'),
+    # Delete a single analysis.
+    path('delete_analysis/<int:analysis_id>/', views.delete_analysis, name='delete_analysis'),
 ]

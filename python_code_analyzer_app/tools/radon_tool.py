@@ -120,7 +120,8 @@ class Radon_Tool:
 	def _get_cc_indicators(self, path_result):
 		list_of_indicators = []
 		path_to_file = path_result+"/result_cc.txt"
-
+		if(not os.path.exists(path_to_file)):
+			return list_of_indicators
 		with open(path_to_file, "r") as f:
 			content = f.read()
 

@@ -19,18 +19,24 @@
 		  </tr>
 		</thead>
 		<tbody>
-		{% for analisis in analyzes %}
+		{% for analysis in analyzes %}
 		<tr class="text-light">
-			<td>{{ analisis }}</td>
-			<td>{{ analisis.date_added|date:'M d, Y H:i' }}</td>
-			<td>{{ analisis.status }}</td>
+			<td>{{ analysis }}</td>
+			<td>{{ analysis.date_added|date:'M d, Y H:i' }}</td>
+			<td>{{ analysis.status }}</td>
 			<td>
-				{% if analisis.status == 'PENDING' or analisis.status == 'RUNNING' %}
-					<a href="{% url 'python_code_analyzer_app:cancel_analysis' analisis.id %}">Cancel</a>
+				<div class="row">
+				{% if analysis.status == 'PENDING' or analysis.status == 'RUNNING' %}
+					<a href="{% url 'python_code_analyzer_app:cancel_analysis' analysis.id %}" class="btn btn-dark" title="Cancel"><i class="fa fa-times"></i></a>
 				{% else %}
-					<a href="{% url 'python_code_analyzer_app:analysis' analisis.id %}">View</a>
+					<a href="{% url 'python_code_analyzer_app:analysis' analysis.id %}" class="btn btn-dark" title="View results"><i class="fa fa-eye"></i></a>
+					<form action="{% url 'python_code_analyzer_app:delete_analysis' analysis.id %}" method="post">
+						{% csrf_token %}
+						<button class="btn btn-dark" type="submit" title="Delete"><i class="fa fa-trash"></i></button>
+					</form>
 				{% endif %}	
 				
+				</div>
 			</td>
 		</tr>
 		{% empty %}

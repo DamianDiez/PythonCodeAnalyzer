@@ -169,4 +169,14 @@ def cancel_analysis(request, analysis_id):
 
     cts.save()
     analysis.cancel("Canceled by user")
-    return repository(request, analysis.repository_id)
+    # Redirigir a la misma página
+    return redirect(request.META['HTTP_REFERER'])
+
+@login_required
+def delete_analysis(request, analysis_id):
+    analysis = Analysis.objects.get(id=analysis_id)
+    analysis.delete_files()
+    repo_id = analysis.repository_id
+    analysis.delete()
+    # Redirigir a la misma página
+    return redirect(request.META['HTTP_REFERER'])
