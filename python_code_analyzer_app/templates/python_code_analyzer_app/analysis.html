@@ -135,15 +135,17 @@
 
 {% block page_header %}
 <nav class="navbar navbar-dark bg-dark">
-	<span class="navbar-brand mb-0">Analysis name: <span style="background-color: #5c5c5c">{{ analysis }}</span></span>
-	<span class="navbar-brand mb-0 ">Status: <span style="background-color: #5c5c5c">{{ analysis.status }}</span></span>
-	<span class="navbar-brand mb-0 ">Date: <span style="background-color: #5c5c5c">{{ analysis.date_added }}</span></span>
-	<span class="navbar-brand mb-0 ">End Date: <span style="background-color: #5c5c5c">{{ analysis.date_finished }}</span></span>
-	{% if analysis.status == 'FINISHED' %}
-		<form class="form-inline">
-			<a  href="{% url 'python_code_analyzer_app:analysis_result' analysis.id %}"  class="btn btn-dark" title="Download results"><i class="fa fa-download"></i></a>
-		</form>
-	{% endif %}
+	<span class="navbar-brand h5">Analysis name: <span style="background-color: #5c5c5c">{{ analysis }}</span></span>
+	<span class="nav-item">Status: <span style="background-color: #5c5c5c">{{ analysis.status }}</span></span>
+	<span class="nav-item">Date: <span style="background-color: #5c5c5c">{{ analysis.date_added }}</span></span>
+	<span class="nav-item">End Date: <span style="background-color: #5c5c5c">{{ analysis.date_finished }}</span></span>
+	<span class="nav-item">
+		{% if analysis.status == 'FINISHED' %}
+			<form class="form-inline">
+				<a  href="{% url 'python_code_analyzer_app:analysis_result' analysis.id %}"  class="btn btn-dark" title="Download results"><i class="fa fa-download"></i></a>
+			</form>
+		{% endif %}
+	</span>
   </nav>
 
 {% endblock page_header %}
