@@ -39,7 +39,6 @@ class Repository(models.Model):
         if os.path.exists(self.path):
             print(f'Repository.donwnload - The repository {self.id} already exists. It will be removed...')
             shutil.rmtree(self.path, onerror = on_rm_error)
-            # os.rmdir(self.path)
         os.mkdir(self.path)
         cmd = "git clone {} {}".format(self.url.strip(), self.path)
         print("#####################################")

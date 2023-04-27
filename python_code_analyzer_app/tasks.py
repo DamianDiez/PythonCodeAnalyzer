@@ -1,7 +1,6 @@
 from celery import shared_task
 from django.contrib.auth.models import User
 from .models import Repository, Analysis, AnalysisTool, CeleryTaskSignal, Tool
-from time import sleep
 from datetime import datetime
 
 
