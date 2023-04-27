@@ -10,7 +10,8 @@
 	<div style="width: 300px; padding: 10px; margin-left: 15px;"  >
 		<form action="{% url 'python_code_analyzer_app:new_analysis' repository.id %}" method='post' >
 			{% csrf_token %}
-			{{ form.as_p }}
+			{% bootstrap_form form %}
+		
 			<ul class="list-unstyled">
 				{% for herr in all_tools %}
 				<li>
@@ -32,9 +33,11 @@
 				</li>
 				{% endfor %}
 			</ul>
+				{% buttons %}
 				<div style="text-align: right;">
 					<button type="submit" class="btn btn-primary" style="display: inline-block; text-align: right;">Add</button>
 				</div>
+				{% endbuttons %}
 			</div>
 		</form>
 	</div>
