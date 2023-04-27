@@ -1,14 +1,13 @@
 {% extends "python_code_analyzer_app/base.html" %}
-
+{% load bootstrap4 %}
 {% block page_header %}
 <nav class="navbar navbar-dark bg-dark">
 	<span class="navbar-brand mb-0 h1">Adding new analysis to repository: <span style="background-color: #5c5c5c">{{ repository }}</span></span>
-  </nav>
+</nav>
 {% endblock page_header %}
 
 {% block content %}
-<div style="width: 710px; border: 2px solid white; padding: 10px; margin-left: 15px;"  >
-	<!-- <div style="text-align: left; border: solid white; border-width: 2px; padding: 10px; width: 600px; margin: 0 auto;"> -->
+	<div style="width: 300px; padding: 10px; margin-left: 15px;"  >
 		<form action="{% url 'python_code_analyzer_app:new_analysis' repository.id %}" method='post' >
 			{% csrf_token %}
 			{{ form.as_p }}
@@ -16,8 +15,8 @@
 				{% for herr in all_tools %}
 				<li>
 					<div class="form-group">
-						<label class="mb-0">{{herr.name}}</label>
-						<div class="custom-control custom-checkbox">
+						<label class="mb-0">{{herr.name}}:</label>
+						<div class="custom-control custom-checkbox" style="margin-left: 40px;">
 							<input type="checkbox" class="custom-control-input" value="clicked" name="chk_enabled-{{herr.id}}" id="chk_enabled-{{herr.id}}" checked>
 							<label class="custom-control-label" for="chk_enabled-{{herr.id}}">Habilitado</label>
 						</div>
@@ -33,11 +32,11 @@
 				</li>
 				{% endfor %}
 			</ul>
-			
-				<button type="submit" class="btn btn-primary" style="display: inline-block; text-align: right;">Add</button>
+				<div style="text-align: right;">
+					<button type="submit" class="btn btn-primary" style="display: inline-block; text-align: right;">Add</button>
+				</div>
 			</div>
 		</form>
 	</div>
-<!-- </div> -->
 
 {% endblock content %}
