@@ -6,7 +6,7 @@ class RepositoryForm(forms.ModelForm):
     class Meta:
         model = Repository
         fields = ['url']
-        labels = {'url': ''}
+        labels = {'url': 'Repository url'}
 
 class AnalysisForm(forms.ModelForm):
     class Meta:
