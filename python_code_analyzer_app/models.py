@@ -2,9 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
 import os, shutil, stat
-import contextlib
 import subprocess
-import sys
 from time import sleep
 
 from .tools.pylint_tool import Pylint_Tool
@@ -47,7 +45,6 @@ class Repository(models.Model):
         print("#####################################")
         print("Starting to clone ${}".format(self.url))
         print(cmd)
-        # os.system(cmd)
         subprocess.call(cmd, shell = True)
         print("Finshed cloning {}".format(self.url))
         print("#####################################")
