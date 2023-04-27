@@ -79,7 +79,13 @@ class Pylint_Tool:
 			elif line.startswith('Your code has been rated at'):
 				self._add(details,detail)
 				resultados = re.findall(r'\d+\.\d+(?=/10)', line)
-				rating = {"current": float(resultados[0]), "previous": float(resultados[1])}
+				current=-1.0
+				previous=-1.0
+				if len(resultados) >= 1:
+					current=float(resultados[0])
+				if len(resultados) >= 2:
+					previous=float(resultados[1])
+				rating = {"current": current, "previous": previous}
 			elif line.startswith('------------------------------------'):
 				None
 			else:#el caso de que sea la continuación del mensaje
