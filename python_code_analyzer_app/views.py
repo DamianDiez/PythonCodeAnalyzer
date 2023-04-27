@@ -188,3 +188,18 @@ def delete_repository(request, repo_id):
     repo.delete()
     # Redirigir a la misma página
     return redirect(request.META['HTTP_REFERER'])
+
+
+@login_required
+def delete_all_analyzes(request, repo_id):
+
+    repo = Repository.objects.get(id=repo_id)
+    analizes = Analysis.objects.filter(repository=repo)
+    for a in analizes:
+        print(a.id)
+        a.delete_files()
+        print("archivos borrados")
+        a.delete()
+        print("analisis borrado")
+    return redirect(request.META['HTTP_REFERER'])
+

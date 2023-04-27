@@ -2,9 +2,15 @@
 {% block page_header %}
 <nav class="navbar navbar-dark bg-dark">
 	<span class="navbar-brand mb-0 h1">Repository: <span style="background-color: #5c5c5c">{{ repository }}</span></span>
-	<form class="form-inline">
-		<a  href="{% url 'python_code_analyzer_app:new_analysis' repository.id %}"  class="btn btn-dark" title="New analysis"><i class="fa fa-plus"></i></a>
-	</form>
+	<div class="row">
+		<form class="form-inline">
+			<a  href="{% url 'python_code_analyzer_app:new_analysis' repository.id %}"  class="btn btn-dark" title="New analysis"><i class="fa fa-plus"></i></a>
+		
+		</form>
+		<button class="btn btn-dark delete-btn" data-url="{% url 'python_code_analyzer_app:delete_all_analyzes' repository.id %}" title="Delete">
+			<i class="fa fa-trash"></i>
+		</button>
+	</div>
   </nav>
 {% endblock page_header %}
 
