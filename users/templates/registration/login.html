@@ -2,18 +2,24 @@
 
 {% load bootstrap4 %}
 {% block page_header %}
+<div style="text-align: center;">
 	<h2>Log in to your account.</h2>
+</div>
 {% endblock page_header %}
 
 {% block content %}
-	<form method="post" action="{% url 'users:login' %}" class="form">
- 		{% csrf_token %}
- 		{% bootstrap_form form %}
- 		{% buttons %}
- 			<button name="submit" class="btn btn-primary">Log in</button>
- 		{% endbuttons %}
-	 	<input type="hidden" name="next" 
-	 		value="{% url 'python_code_analyzer_app:index' %}" />
- 	</form>
+	<div style="text-align: center;">
+			<form method="post" action="{% url 'users:login' %}" class="form" style="display: inline-block; text-align: left; width: 340px;">
+				{% csrf_token %}
+				{% bootstrap_form form %}
+				{% buttons %}
+				<div style="text-align: center;">
+					<button name="submit" class="btn btn-primary">Log in</button>
+				</div>
+				{% endbuttons %}
+				<input type="hidden" name="next" 
+					value="{% url 'python_code_analyzer_app:index' %}" />
+			</form>
+	</div>
  
 {% endblock content %}
