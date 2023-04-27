@@ -53,6 +53,13 @@ class Repository(models.Model):
         print("Finshed cloning {}".format(self.url))
         print("#####################################")
 
+    def delete_files(self):
+        if os.path.isdir(self.path):
+            shutil.rmtree(self.path)
+        if os.path.isdir(self.path+"_result"):
+            shutil.rmtree(self.path+"_result")
+
+
     def getLastCommit(self):
         print(f'Repository.getLastCommit - repository path {self.path}..')
 

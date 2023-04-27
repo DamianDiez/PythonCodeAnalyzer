@@ -1,33 +1,97 @@
 {% extends "python_code_analyzer_app/base.html" %}
 {% block page_header %}
-	<h1>Repositories</h1>
+<nav class="navbar navbar-dark bg-dark">
+	<span class="navbar-brand mb-0 h1">Repositories</span>
+	<form class="form-inline">
+		<a href="{% url 'python_code_analyzer_app:new_repository' %}" class="btn btn-dark" title="New repository"><i class="fa fa-plus"></i></a>
+		<a href="{% url 'python_code_analyzer_app:massive_upload' %}" class="btn btn-dark" title="Upload from file"><i class="fa fa-upload"></i></a>
+	</form>
+  </nav>
 {% endblock page_header %}
 
 
 {% block content %}
-		<ul>
-		{% for repo in repositories %}
-		<li><h3>
-			<a href="{% url 'python_code_analyzer_app:repository' repo.id %}">{{ repo }}</a>
-		</h3></li>
-		{% empty %}
-			<li><h3>No repositories have been added yet.</h3></li>
-		{% endfor %}
-		</ul>
-		<h3><a href="{% url 'python_code_analyzer_app:new_repository' %}">Add new repository</a></h3>
-		<h3><a href="{% url 'python_code_analyzer_app:massive_upload' %}">Massive Uplodad</a></h3>
+		
+		<table class="table">
+			<thead class="thead-dark">
+			  <tr>
+				<th>Id</th>
+				<th>Url</th>
+				<th>Actions</th>
+			  </tr>
+			</thead>
+			<tbody>
+			{% for repo in repositories %}
+			<tr class="text-light">
+				<td>{{ repo.id }}</td>
+				<td>{{ repo }}</td>
+				<td>
+					<div class="row">
+						<a href="{% url 'python_code_analyzer_app:repository' repo.id %}" class="btn btn-dark" title="View analyzes"><i class="fa fa-eye"></i></a>
+						<button class="btn btn-dark delete-btn" data-url="{% url 'python_code_analyzer_app:delete_repository' repo.id %}" title="Delete">
+							<i class="fa fa-trash"></i>
+						</button>
+					</div>
+				</td>
+			</tr>
+			{% empty %}
+				<tr>
+					<td colspan="2">No repositories have been added yet.</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
 
-	<br/><br/>
+
 	<!-- pagination -->
-	{% if repositories.has_previous %}
-		<a href="?page=1">&laquo First</a>
-		<a href="?page={{ repositories.previous_page_number }}">Previous</a>
-	{% endif %}
-
-	Page {{repositories.number}} of {{ repositories.paginator.num_pages }}
-
-	{% if repositories.has_next %}
-		<a href="?page={{ repositories.next_page_number}}">Next</a>
-		<a href="?page={{ repositories.paginator.num_pages }}">Last &raquo </a>
-	{% endif %}
+	
+	<nav class="d-flex justify-content-center" aria-label="Page navigation example">
+		<ul class="pagination">
+		  {% if repositories.has_previous %}
+			<li class="page-item">
+				<a class="page-link bg-dark text-light" href="?page=1">First</a>
+			</li>
+			<li class="page-item">
+			  <a class="page-link bg-dark text-light" href="?page={{ repositories.previous_page_number }}">Previous</a>
+			</li>
+		  {% else %}
+			<li class="page-item disabled">
+				<a class="page-link bg-dark text-light" href="?page=1">First</a>
+			</li>
+			<li class="page-item disabled">
+			  <a class="page-link  bg-dark text-light" href="#">Previous</a>
+			</li>
+		  {% endif %}
+	
+		  {% for num in repositories.paginator.page_range %}
+		  	{% if num > repositories.number|add:'-6' and num < repositories.number|add:'6' %}
+				{% if repositories.number == num %}
+				<li class="page-item active">
+					<a class="page-link" href="#">{{ num }} <span class="sr-only">(current)</span></a>
+				</li>
+				{% else %}
+				<li class="page-item">
+					<a class="page-link bg-dark text-light" href="?page={{ num }}">{{ num }}</a>
+				</li>
+				{% endif %}
+			{% endif %}
+		  {% endfor %}
+	
+		  {% if repositories.has_next %}
+			<li class="page-item">
+			  <a class="page-link bg-dark text-light" href="?page={{ repositories.next_page_number }}">Next</a>
+			</li>
+			<li class="page-item">
+				<a class="page-link bg-dark text-light" href="?page={{ repositories.paginator.num_pages }}">Last</a>
+			</li>
+		  {% else %}
+			<li class="page-item disabled">
+			  <a class="page-link bg-dark text-light" href="#">Next</a>
+			</li>
+			<li class="page-item disabled">
+				<a class="page-link bg-dark text-light" href="?page={{ repositories.paginator.num_pages }}">Last</a>
+			</li>
+		  {% endif %}
+		</ul>
+	  </nav>
 {% endblock content %}

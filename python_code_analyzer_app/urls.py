@@ -26,4 +26,6 @@ urlpatterns = [
     path('cancel_analysis/<int:analysis_id>/', views.cancel_analysis, name='cancel_analysis'),
     # Delete a single analysis.
     path('delete_analysis/<int:analysis_id>/', views.delete_analysis, name='delete_analysis'),
+    # Delete a single repository.
+    path('delete_repository/<int:repo_id>/', views.delete_repository, name='delete_repository'),
 ]

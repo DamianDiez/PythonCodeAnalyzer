@@ -21,7 +21,7 @@ def index(request):
 def repositories(request):
     """Show all repositories."""
     #Set up pagination
-    p = Paginator(Repository.objects.filter(owner=request.user).order_by('date_added'), 20)
+    p = Paginator(Repository.objects.filter(owner=request.user).order_by('date_added'), 8)
     page = request.GET.get('page')
     repos = p.get_page(page)
     context = {'repositories': repos}
@@ -35,7 +35,7 @@ def repository(request, repository_id):
     if repository.owner != request.user:
         raise Http404
     analyzes = repository.analysis_set.order_by('-date_added')
-    p = Paginator(repository.analysis_set.order_by('-date_added'), 10)
+    p = Paginator(repository.analysis_set.order_by('-date_added'), 8)
     page = request.GET.get('page')
     analyzes = p.get_page(page)
     context = {'repository': repository, 'analyzes': analyzes}
@@ -178,5 +178,13 @@ def delete_analysis(request, analysis_id):
     analysis.delete_files()
     repo_id = analysis.repository_id
     analysis.delete()
+    # Redirigir a la misma página
+    return redirect(request.META['HTTP_REFERER'])
+
+@login_required
+def delete_repository(request, repo_id):
+    repo = Repository.objects.get(id=repo_id)
+    repo.delete_files()
+    repo.delete()
     # Redirigir a la misma página
     return redirect(request.META['HTTP_REFERER'])
