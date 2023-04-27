@@ -2,10 +2,15 @@
 {% block page_header %}
 <nav class="navbar navbar-dark bg-dark">
 	<span class="navbar-brand mb-0 h1">Repositories</span>
-	<form class="form-inline">
-		<a href="{% url 'python_code_analyzer_app:new_repository' %}" class="btn btn-dark" title="New repository"><i class="fa fa-plus"></i></a>
-		<a href="{% url 'python_code_analyzer_app:massive_upload' %}" class="btn btn-dark" title="Upload from file"><i class="fa fa-upload"></i></a>
-	</form>
+	<div class="row">
+		<form class="form-inline">
+			<a href="{% url 'python_code_analyzer_app:new_repository' %}" class="btn btn-dark" title="New repository"><i class="fa fa-plus"></i></a>
+			<a href="{% url 'python_code_analyzer_app:massive_upload' %}" class="btn btn-dark" title="Upload from file"><i class="fa fa-upload"></i></a>
+		</form>
+		<button class="btn btn-dark delete-btn" data-url="{% url 'python_code_analyzer_app:delete_all_repositories' %}" title="Delete all">
+			<i class="fa fa-trash"></i>
+		</button>
+	</div>
   </nav>
 {% endblock page_header %}
 
@@ -35,8 +40,8 @@
 				</td>
 			</tr>
 			{% empty %}
-				<tr>
-					<td colspan="2">No repositories have been added yet.</td>
+				<tr class="text-light">
+					<td colspan="3">No repositories have been added yet.</td>
 				</tr>
 			{% endfor %}
 			</tbody>

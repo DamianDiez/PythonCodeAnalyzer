@@ -189,10 +189,8 @@ def delete_repository(request, repo_id):
     # Redirigir a la misma página
     return redirect(request.META['HTTP_REFERER'])
 
-
 @login_required
 def delete_all_analyzes(request, repo_id):
-
     repo = Repository.objects.get(id=repo_id)
     analizes = Analysis.objects.filter(repository=repo)
     for a in analizes:
@@ -201,5 +199,16 @@ def delete_all_analyzes(request, repo_id):
         print("archivos borrados")
         a.delete()
         print("analisis borrado")
+    return redirect(request.META['HTTP_REFERER'])
+
+@login_required
+def delete_all_repositories(request):
+    repos = Repository.objects.filter(owner=request.user)
+    for r in repos:
+        print(r.id)
+        r.delete_files()
+        print("archivos borrados")
+        r.delete()
+        print("repo borrado")
     return redirect(request.META['HTTP_REFERER'])
 

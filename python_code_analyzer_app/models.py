@@ -55,9 +55,9 @@ class Repository(models.Model):
 
     def delete_files(self):
         if os.path.isdir(self.path):
-            shutil.rmtree(self.path)
+            shutil.rmtree(self.path, onerror = on_rm_error)
         if os.path.isdir(self.path+"_result"):
-            shutil.rmtree(self.path+"_result")
+            shutil.rmtree(self.path+"_result", onerror = on_rm_error)
 
 
     def getLastCommit(self):
