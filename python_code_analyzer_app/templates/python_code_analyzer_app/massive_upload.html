@@ -1,12 +1,22 @@
 {% extends "python_code_analyzer_app/base.html" %}
+{% load bootstrap4 %}
 
+{% block page_header %}
+<nav class="navbar navbar-dark bg-dark">
+	<span class="navbar-brand mb-0 h1">Uploading file</span></span>
+</nav>
+{% endblock page_header %}
 {% block content %}
-	<p>Upload a file:</p>
- 
-	<form action="{% url 'python_code_analyzer_app:massive_upload' %}" enctype="multipart/form-data" method='post'>
-		{% csrf_token %}
-		{{ form.as_p }}
-		<button name="submit">Upload</button>
-	</form>
+	<div style="width: 700px; padding: 10px; margin-left: 5px;"  > 
+		<form action="{% url 'python_code_analyzer_app:massive_upload' %}" enctype="multipart/form-data" method='post'>
+			{% csrf_token %}
+			{% bootstrap_form form %}
+			{% buttons %}
+			<div style="text-align: right;">
+				<button name="submit" class="btn btn-primary">Upload</button>
+			</div>
+			{% endbuttons %}
+		</form>
+	</div>
  
 {% endblock content %}
