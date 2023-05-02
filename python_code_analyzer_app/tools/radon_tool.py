@@ -45,7 +45,8 @@ class Radon_Tool:
 			for clase in clases:
 				values = clases[clase]
 				for value in values:
-					ranks[labels.index(value["rank"])]+=1
+					if "rank" in values:
+						ranks[labels.index(value["rank"])]+=1
 		chart=Chart('Radon-CC', 6, Chart.DOUGHNUT, 'Cyclomatic Complexity', json.dumps(labels), ranks)
 		list_of_charts.append(chart)
 		return list_of_charts
@@ -63,7 +64,8 @@ class Radon_Tool:
 			for dato in datos:
 				files.append(dato.rsplit('\\', 1)[1])
 				values = datos[dato]
-				mis.append(values["mi"])
+				if "mi" in values:
+					mis.append(values["mi"])
 				#mis.append(values.get("mi"))
 		chart=Chart('Radon-MI', 12, Chart.BAR, 'Modificability Index by Module', json.dumps(files), mis, 150)
 		list_of_charts.append(chart)
@@ -82,7 +84,8 @@ class Radon_Tool:
 			for dato in datos:
 				files.append(dato.rsplit('\\', 1)[1])
 				values = datos[dato]
-				comments.append(values["comments"])
+				if "comments" in values:
+					comments.append(values["comments"])
 		chart=Chart('Radon-RAW', 6, Chart.BAR, 'Radon - RAW', json.dumps(files), comments)
 		list_of_charts.append(chart)
 		return list_of_charts
@@ -101,16 +104,16 @@ class Radon_Tool:
 		path_to_file = path_result+"/result_raw.json"
 		if(not os.path.exists(path_to_file)):
 			return list_of_indicators
-		comments=[]
 		totalLOC=0
 		totalComments=0
 		with open(path_to_file) as contenido:
 			datos = json.load(contenido)
 			for dato in datos:
 				values = datos[dato]
-				comments.append(values["comments"])
-				totalLOC+=values["loc"]
-				totalComments+=values["multi"] + values["single_comments"]
+				if "loc" in values:
+					totalLOC+=values["loc"]
+				if "multi" in values and "single_comments" in values:
+					totalComments+=values["multi"] + values["single_comments"]
 
 		list_of_indicators.append(Indicator("radon-line-of-code", "# of lines of Code", 3, totalLOC, Indicator.DEFAULT, 0, 0, 0, 0))
 		list_of_indicators.append(Indicator("radon-line-of-comments", "# of lines of Comments", 3, totalComments, Indicator.DEFAULT, 0, 0, 0, 0))
