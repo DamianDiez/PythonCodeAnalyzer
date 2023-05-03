@@ -135,6 +135,7 @@
 
 {% block page_header %}
 <nav class="navbar navbar-dark bg-dark">
+	<a  href="javascript:history.go(-1);"  class="btn btn-dark" title="Back"><i class="fa fa-arrow-left"></i></a>
 	<span class="navbar-brand h5">Analysis name: <span style="background-color: #5c5c5c">{{ analysis }}</span></span>
 	<span class="nav-item">Status: <span style="background-color: #5c5c5c">{{ analysis.status }}</span></span>
 	<span class="nav-item">Date: <span style="background-color: #5c5c5c">{{ analysis.date_added }}</span></span>

@@ -1,7 +1,8 @@
 {% extends "python_code_analyzer_app/base.html" %}
 {% load bootstrap4 %}
 {% block page_header %}
-<nav class="navbar navbar-dark bg-dark">
+<nav class="navbar-dark bg-dark">
+	<span class="navbar-brand mb-0 h1"><a href="javascript:history.go(-1);" class="btn btn-dark" title="Back"><i class="fa fa-arrow-left"></i></a></span>
 	<span class="navbar-brand mb-0 h1">Adding new analysis to repository: <span style="background-color: #5c5c5c">{{ repository }}</span></span>
 </nav>
 {% endblock page_header %}
