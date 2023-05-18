@@ -55,8 +55,8 @@ class Repository(models.Model):
             shutil.rmtree(self.path+"_result", onerror = on_rm_error)
 
 
-    def getLastCommit(self):
-        print(f'Repository.getLastCommit - repository path {self.path}..')
+    def get_last_commit(self):
+        print(f'Repository.get_last_commit - repository path {self.path}..')
 
         result = subprocess.run(["git","-C", self.path, "rev-parse", "HEAD"], capture_output=True,shell=True)
         commit = result.stdout.strip()
@@ -108,14 +108,13 @@ class Tool(models.Model):
         analysis = Analysis.objects.get(id=analysis_tool.analysis.id)
         repository = Repository.objects.get(id=analysis.repository_id)
         tool_class = globals()[self.class_name]()
-        path_result=repository.path+f"_result/Analisis{analysis.id}/{self.name}"
+        path_result=analysis.path_result+self.name
         return tool_class.get_charts(path_result)
     
     def get_indicators(self, analysis_tool):
         analysis = Analysis.objects.get(id=analysis_tool.analysis.id)
-        repository = Repository.objects.get(id=analysis.repository_id)
         tool_class = globals()[self.class_name]()
-        path_result=repository.path+f"_result/Analisis{analysis.id}/{self.name}"
+        path_result=analysis.path_result+self.name
         return tool_class.get_indicators(path_result)
 
 class Analysis(models.Model):
@@ -136,6 +135,12 @@ class Analysis(models.Model):
         """Return a string representation of the model."""
         return f'Analysis {self.id}'
 
+    @property
+    def path_result(self):
+        repository = Repository.objects.get(id=self.repository_id)
+        path_result = repository.path+f"_result/Analisis{self.id}/"
+        return path_result
+    
     def start(self):
         self.status = tools_status.RUNNING
         self.save()

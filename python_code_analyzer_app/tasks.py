@@ -38,7 +38,7 @@ def excecute_analysis(analysis_id):
     #try:
     #descargar el repositorio
     repository.download()
-    commit = repository.getLastCommit()
+    commit = repository.get_last_commit()
     #seteo el commit
     analysis.set_commit(commit)
 

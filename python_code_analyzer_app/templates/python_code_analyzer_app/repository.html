@@ -20,7 +20,7 @@
 		<thead class="thead-dark">
 		  <tr>
 			<th>Id</th>
-			<th>Name</th>
+			<th>Commit</th>
 			<th>Date</th>
 			<th>Status</th>
 			<th>Actions</th>
@@ -30,7 +30,7 @@
 		{% for analysis in analyzes %}
 		<tr class="text-light">
 			<td>{{ analysis.id }}</td>
-			<td>{{ analysis }}</td>
+			<td>{{ analysis.commit }}</td>
 			<td>{{ analysis.date_added|date:'M d, Y H:i' }}</td>
 			<td>{{ analysis.status }}</td>
 			<td>
