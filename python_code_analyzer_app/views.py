@@ -67,12 +67,9 @@ def massive_upload(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             f = request.FILES['file']
-            print(f"Nombre del archivo: {f.name}")
             with open("C:/tesis/git/massive.txt", 'wb+') as destination:
                 for chunk in f.chunks():
                     destination.write(chunk)
-            print(f"Va a mostrar el user")
-            print(f"massive_upload - user id = {request.user.id}")
             task_id = launch_massive_upload.apply_async(("C:/tesis/git/massive.txt",request.user.id,),countdown=5,queue='repository_queue')
             return redirect('python_code_analyzer_app:repositories')
     else:
@@ -87,14 +84,8 @@ def new_analysis(request, repository_id):
 
  
     if request.method != 'POST':
-        # No data submitted; create a blank form.
         form = AnalysisForm()
-        # forms = []
-        # for x in all_tools:
-        #     at_form = AnalysisToolForm(initial={'tool_id': x.id})
-        #     forms.append(at_form)
     else:
-        # POST data submitted; process data.
         form = AnalysisForm(data=request.POST)
         if form.is_valid():
             new_analysis = form.save(commit=False)
@@ -128,13 +119,10 @@ def analysis(request, analysis_id):
     """Show a single analysis detail"""
     list_of_charts = []
     analysis = Analysis.objects.get(id=analysis_id)
-    repository = Repository.objects.get(id=analysis.repository_id)
-    analysis_path = repository.path+"_result" +"/"+f"Analisis{analysis_id}"
     indicators=analysis.get_indicators()
     result_list=analysis.get_charts()
     list_of_charts=list_of_charts + result_list
-    for x in list_of_charts:
-        print(x.label)
+
     context = {'analysis': analysis, 'list_of_charts': list_of_charts, 'list_of_indicators': indicators}
     return render(request, 'python_code_analyzer_app/analysis.html', context)
 
@@ -142,10 +130,7 @@ def analysis(request, analysis_id):
 def analysis_result(request, analysis_id):
     """Show a single analysis detail"""
     analysis = Analysis.objects.get(id=analysis_id)
-    repository = Repository.objects.get(id=analysis.repository_id)
-    # path_to_file = os.path.join(repository.path+"_result",f"Analisis{analysis_id}.zip")
-    path_to_file = repository.path+"_result" +"/"+f"Analisis{analysis_id}.zip"
-    print(f"analysis_result - {path_to_file}")
+    path_to_file = analysis.path_to_zip
     if os.path.exists(path_to_file):
         with open(path_to_file, 'rb') as fh:
             response = HttpResponse(fh.read(), content_type="application/force-download")
@@ -159,10 +144,6 @@ def cancel_analysis(request, analysis_id):
     """Cancel a single analysis"""
     analysis = Analysis.objects.get(id=analysis_id)
     print(f"cancel_analysis - analysis.id: {analysis.id}")
-    #Si todavia no arranco, esto cancela el task
-    #revoke_result = app.control.revoke(task_id, terminate=True)
-    #print(f"revoke_result: {revoke_result}")
-    #analysis.cancel()
     cts = CeleryTaskSignal()
     cts.analysis = analysis
     cts.signal = CeleryTaskSignal.CANCEL_TASK
@@ -176,7 +157,6 @@ def cancel_analysis(request, analysis_id):
 def delete_analysis(request, analysis_id):
     analysis = Analysis.objects.get(id=analysis_id)
     analysis.delete_files()
-    repo_id = analysis.repository_id
     analysis.delete()
     # Redirigir a la misma página
     return redirect(request.META['HTTP_REFERER'])
@@ -194,21 +174,15 @@ def delete_all_analyzes(request, repo_id):
     repo = Repository.objects.get(id=repo_id)
     analizes = Analysis.objects.filter(repository=repo)
     for a in analizes:
-        print(a.id)
         a.delete_files()
-        print("archivos borrados")
         a.delete()
-        print("analisis borrado")
     return redirect(request.META['HTTP_REFERER'])
 
 @login_required
 def delete_all_repositories(request):
     repos = Repository.objects.filter(owner=request.user)
     for r in repos:
-        print(r.id)
         r.delete_files()
-        print("archivos borrados")
         r.delete()
-        print("repo borrado")
     return redirect(request.META['HTTP_REFERER'])
 
