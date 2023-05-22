@@ -1,14 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
-import os, shutil, stat
-import subprocess
+import os, shutil, stat, json, subprocess, re, contextlib
 from time import sleep
-
-from .tools.pylint_tool import Pylint_Tool
-from .tools.radon_tool import Radon_Tool
-from .tools.vulture_tool import Vulture_Tool
+from python_code_analyzer_app.tools.chart_class import Chart
+from python_code_analyzer_app.tools.indicator_class import Indicator
 from .tools import tools_status
+import vulture
+
 
 BASE_PATH = "C:/tesis/git/"
 
@@ -96,26 +95,24 @@ class Tool(models.Model):
         """Return a string representation of the model."""
         return self.name
 
+    def get_instance(self):
+        instancia_clase_hija = globals()[self.class_name]()
+        return instancia_clase_hija
+
+    
+    
+    class Meta:
+        abstract = False
+        db_table = 'python_code_analyzer_app_tool'
+        
     def run(self, analysis_tool):
-        print('Tool.run')
-        analysis = Analysis.objects.get(id=analysis_tool.analysis.id)
-        repository = Repository.objects.get(id=analysis.repository_id)
-        tool_class = globals()[self.class_name]()
-        print(f"Tool.run() - tool_class: {tool_class}")
-        return tool_class.run(analysis.id, repository.path, self.name)
+        pass
 
     def get_charts(self, analysis_tool):
-        analysis = Analysis.objects.get(id=analysis_tool.analysis.id)
-        repository = Repository.objects.get(id=analysis.repository_id)
-        tool_class = globals()[self.class_name]()
-        path_result=analysis.path_result+self.name
-        return tool_class.get_charts(path_result)
+        pass
     
     def get_indicators(self, analysis_tool):
-        analysis = Analysis.objects.get(id=analysis_tool.analysis.id)
-        tool_class = globals()[self.class_name]()
-        path_result=analysis.path_result+self.name
-        return tool_class.get_indicators(path_result)
+        pass
 
 class Analysis(models.Model):
     """Analisis de un repositorio"""
@@ -138,7 +135,13 @@ class Analysis(models.Model):
     @property
     def path_result(self):
         repository = Repository.objects.get(id=self.repository_id)
-        path_result = repository.path+f"_result/Analisis{self.id}/"
+        path_result = repository.path+f"_result/Analysis{self.id}/"
+        return path_result
+    
+    @property
+    def path_to_zip(self):
+        repository = Repository.objects.get(id=self.repository_id)
+        path_result = repository.path+f"_result/Analysis{self.id}.zip"
         return path_result
     
     def start(self):
@@ -148,6 +151,7 @@ class Analysis(models.Model):
     def run(self):
         failed=False
         tools = self.analysistool_set.all()
+        
         for tool in tools:
             if (CeleryTaskSignal.is_task_cancelled(self.id)):
                 print(f"Analysis.run - Tarea Cancelada {self.id}")
@@ -157,7 +161,9 @@ class Analysis(models.Model):
         if(failed):
             self.status = tools_status.FAILED
         else:
-            path_result = os.path.join(self.repository.path+"_result",f"Analisis{self.id}")
+            path_result = self.path_result
+            if path_result.endswith('/'):
+                path_result = path_result[:-1]
             format = "zip"
             shutil.make_archive(path_result, format, path_result)
             self.status = tools_status.FINISHED
@@ -169,8 +175,8 @@ class Analysis(models.Model):
         self.save()
 
     def delete_files(self):
-        path_result = os.path.join(self.repository.path+"_result",f"Analisis{self.id}")
-        path_result_zip = os.path.join(self.repository.path+"_result",f"Analisis{self.id}.zip")
+        path_result = self.path_result
+        path_result_zip = self.path_to_zip
         if os.path.isdir(path_result):
             shutil.rmtree(path_result)
         if os.path.isfile(path_result_zip):
@@ -188,9 +194,8 @@ class Analysis(models.Model):
         tools = self.analysistool_set.all()
         charts=[]
         for tool in tools:
+            print(tool)
             charts += tool.get_charts()
-        # for index in range(len(charts)):
-        #     charts[index].position=index
         return charts
     
     def get_indicators(self):
@@ -198,8 +203,6 @@ class Analysis(models.Model):
         indicators=[]
         for tool in tools:
             indicators += tool.get_indicators()
-        # for index in range(len(indicators)):
-        #     indicators[index].position=index
         return indicators
 
 class AnalysisTool(models.Model):
@@ -212,19 +215,36 @@ class AnalysisTool(models.Model):
 
 
     def run(self):
-        xstatus = self.tool.run(self)
-        print(f"AnalysisTool.run() - status {xstatus}")
+        instancia = self.tool.get_instance()
+        if(instancia == None):
+            return tools_status.FAILED
+        xstatus = instancia.run(self)
         self.status=xstatus
         self.save()
         return xstatus
 
     def get_charts(self):
-        charts = self.tool.get_charts(self)
+        instancia = self.tool.get_instance()
+        if(instancia == None):
+            return []
+        charts = instancia.get_charts(self)
         return charts
     
     def get_indicators(self):
-        indicators = self.tool.get_indicators(self)
+        instancia = self.tool.get_instance()
+        if(instancia == None):
+            return []
+        indicators = instancia.get_indicators(self)
         return indicators
+    
+    def get_path_result_analysis(self):
+        analysis = Analysis.objects.get(id=self.analysis.id)
+        return analysis.path_result
+    
+    def get_path_repository(self):
+        analysis = Analysis.objects.get(id=self.analysis.id)
+        repo = Repository.objects.get(id=analysis.repository.id)
+        return repo.path
 
 class CeleryTaskSignal(models.Model):   
     CANCEL_TASK = 'cancel_task'
@@ -246,13 +266,9 @@ class CeleryTaskSignal(models.Model):
         cts = CeleryTaskSignal.objects.filter(signal=CeleryTaskSignal.CANCEL_TASK,
             completed=False,
             analysis = analysis)
-        print(f"is_task_cancelled - cts: {cts}")
         if(cts):
-            print(f"is_task_cancelled - entra al if")
             cts.completed = True
-            print(f"is_task_cancelled - retorna True")
             return True
-        print(f"is_task_cancelled - retorna falso")
         return False
 
     def mark_completed(self, save=True):
@@ -264,3 +280,424 @@ class CeleryTaskSignal(models.Model):
     class Meta:
         ordering = ('modified_on',)
 
+# region Tools
+class Pylint_Tool(Tool):
+
+    def __init__(self):
+        """init"""
+        self.name="Pylint"
+        self.class_name="Pylint_Tool"
+
+    class Meta:
+        managed = False
+        db_table = 'python_code_analyzer_app_tool'
+    
+    def _add(self,details,detail):
+        if(detail != None):
+            details.append(detail)
+            msg = detail["message"].rstrip()
+            index = msg.rfind('(')
+            # Si no se encuentra el carácter '(', lanzamos una excepción
+            if index == -1:
+                raise ValueError("No se encontró el carácter '(' en la cadena")
+            # Obtener el mensaje y la categoría del mensaje usando rebanado de cadenas
+            message = msg[:index].strip()
+            category = msg[index+1:-1]
+            detail["symbol"]=category
+            detail["message"] = message
+            detail = None
+
+    def _getType(self,message_id):
+        if message_id.startswith("C"):
+            return "convention"
+        if message_id.startswith("E"):
+            return "error"
+        if message_id.startswith("W"):
+            return "warning"
+        if message_id.startswith("R"):
+            return "refactor"
+        if message_id.startswith("I"):
+            return "information"
+        if message_id.startswith("F"):
+            return "fatal"
+
+    def _toJson(self,fileTxt,fileJson):
+        with open(fileTxt, 'r') as file:
+            lines = file.readlines()
+
+        details = []
+        detail = None
+        for line in lines:
+            message=""        
+            if line.startswith('*************'):
+                x, y, module = line.split()
+            elif line.startswith('C:'):
+                self._add(details,detail)
+                line_split=line.split(':')
+                disc=line_split[0]
+                path=line_split[1]
+                line=line_split[2]
+                column=line_split[3]
+                message_id=line_split[4]
+                for item in line_split[4:]:
+                    message=message + item
+                message = message.strip()
+                detail={
+                    'type': self._getType(message_id.strip()),
+                    'module': module,
+                    'obj': "",
+                    'line': int(line),
+                    'column': int(column),
+                    'endLine': int(line),
+                    'endColumn': int(column),
+                    'path': disc+":"+path,
+                    'symbol': None,
+                    'message': message,
+                    'message-id': message_id.strip()
+                }
+            elif line.startswith('Your code has been rated at'):
+                self._add(details,detail)
+                resultados = re.findall(r'\d+\.\d+(?=/10)', line)
+                current=-1.0
+                previous=-1.0
+                if len(resultados) >= 1:
+                    current=float(resultados[0])
+                if len(resultados) >= 2:
+                    previous=float(resultados[1])
+                rating = {"current": current, "previous": previous}
+            elif line.startswith('------------------------------------'):
+                None
+            else:#el caso de que sea la continuación del mensaje
+                if line != "":
+                    detail['message'] = detail['message'] + line;
+                
+
+        result = {'details': details, 
+                'rating': rating}
+
+        with open(fileJson, 'w') as file:
+            json.dump(result, file, indent=4)
+
+    def run(self, analysis_tool):
+        path_result = analysis_tool.get_path_result_analysis()+self.name
+        repository_path = analysis_tool.get_path_repository()
+
+        if not os.path.exists(path_result):
+            os.makedirs(path_result)
+        
+        file_result_json = os.path.join(path_result,"result.json")
+        file_result_text = os.path.join(path_result,"result.txt")
+
+        # ejemplo
+        # options = ["--recursive=y","--output-format=json:C:/tesis/git/result.json","C:/tesis/git/a3657248f44443498e74ba57bef673d8"]
+        #options = ["--recursive=y",f"--output-format=text:{file_result}",f"{repository_path}"]
+
+        try:
+            with open(file_result_text,"wb") as out:
+                result = subprocess.run(["pylint","--recursive=y", repository_path], stdout=out, shell=True)
+            
+            self._toJson(file_result_text,file_result_json)
+        except BaseException as err:
+            print(f"Pylint_Tool.run() - Unexpected {err=}, {type(err)=}")
+        finally:
+            print("Pylint_Tool.run() - Finalizado")
+            return tools_status.FINISHED
+
+    def __get_number_of_messages_by_type(self,datos):
+        tipos = [x['type'] for x in datos]
+        tipos=sorted(list(set(tipos)),key=str.lower)
+        #cantidad de elementos de cada tipo
+        valores = []
+        for tipo in tipos:
+            valores.append( sum(x['type']==tipo for x in datos) )
+        chart=Chart('Pylint-types', 6, Chart.BAR, '# of Messages by Type', tipos, valores)
+        return chart
+
+    def __get_number_of_messages_by_symbol(self,datos):
+        symbols = [x['symbol'] for x in datos]
+        symbols=sorted(list(set(symbols)),key=str.lower)
+        #cantidad de elementos de cada tipo
+        valores = []
+        for symbol in symbols:
+            valores.append( sum(x['symbol']==symbol for x in datos) )
+        display_legend = True
+        if len(symbol)>10:
+            display_legend = 'false'
+        chart=Chart('Pylint-symbols', 6, Chart.PIE, 'Pylint - Tipos de mensaje', symbols, valores, 400, display_legend)
+        return chart
+
+    def __get_number_of_msg_type_by_module(self, msg_type, datos, modulos):
+        #cantidad de elementos de cada tipo
+        valores = []
+        for modulo in modulos:
+            valores.append( sum(x['type']==msg_type and x['module'] ==modulo for x in datos) )
+        # chart=Chart(f"Pylint-{msg_type}-module", 1, Chart.BAR, f'Pylint - {msg_type}s by module', modulos, valores)
+        return valores
+
+    def __get_messages_by_module(self, datos):
+        charts = []
+        tipos = [x['type'] for x in datos]
+        tipos=sorted(list(set(tipos)),key=str.lower);
+        modulos = [x['module'] for x in datos]
+        modulos=sorted(list(set(modulos)),key=str.lower);
+        all_values = []
+        for tipo in tipos:
+            valores = self.__get_number_of_msg_type_by_module( tipo, datos, modulos)		
+            for i in range(len(modulos)):
+                all_values.append({"x": modulos[i], "y": tipo, "v": valores[i]})
+            
+            # chart=Chart(f"Pylint-{tipo}-module", 1, Chart.BAR, f'Pylint - {tipo}s by module', modulos, valores)
+            # charts.append(chart)
+        
+        
+        charts.insert(0,Chart(f"Pylint-heatmap-module", 12, Chart.MATRIX, f'Heatmap by Module', modulos, all_values,100, 'false', tipos))
+            
+
+        return charts
+
+    def get_charts(self, analysis_tool):
+        path_result = analysis_tool.get_path_result_analysis()+self.name
+        list_of_charts = []
+        path_to_file = path_result+"/result.json"
+        if(not os.path.exists(path_to_file)):
+            return list_of_charts
+
+        with open(path_to_file) as contenido:
+            datos = json.load(contenido)
+
+        details = datos['details']
+        list_of_charts+=self.__get_messages_by_module(details)
+        list_of_charts.append(self.__get_number_of_messages_by_type(details))
+        #list_of_charts.append(self.__get_number_of_messages_by_symbol(details))
+        
+        return list_of_charts
+
+    
+    def get_indicators(self, analysis_tool):
+        path_result = analysis_tool.get_path_result_analysis()+self.name
+        list_of_indicators = []
+        path_to_file = path_result+"/result.json"
+        if(not os.path.exists(path_to_file)):
+            return list_of_indicators
+
+        with open(path_to_file) as contenido:
+            datos = json.load(contenido)
+        
+        rating = datos['rating']
+        list_of_indicators.append(Indicator("pylint-rating", "Rating", 3, rating["current"], Indicator.RATING, 10, 4.0, 7.0, 9.0))
+        details = datos['details']
+        modulos = [x['module'] for x in details]
+        modulos=sorted(list(set(modulos)),key=str.lower);
+        list_of_indicators.append(Indicator("pylint-modules", "# of Modules", 3, len(modulos), Indicator.DEFAULT, 10, 4.0, 7.0, 9.0))
+        
+        return list_of_indicators
+
+class Vulture_Tool(Tool):
+
+    def __init__(self):
+        """init"""
+        self.name="Vulture"
+        self.class_name="Vulture_Tool"
+
+    class Meta:
+        managed = False
+        db_table = 'python_code_analyzer_app_tool'
+
+    def run(self, analysis_tool):
+        path_result = analysis_tool.get_path_result_analysis()+self.name
+        repository_path = analysis_tool.get_path_repository()
+        if not os.path.exists(path_result):
+            os.makedirs(path_result)
+        file_result = os.path.join(path_result,"result.txt")
+        try:
+            v = vulture.Vulture()
+            v.scavenge([f"{repository_path}"])
+            with open(file_result, "w") as o:
+                with contextlib.redirect_stdout(o):
+                    v.report()
+
+        except BaseException as err:
+            print(f"Vulture_Tool.run() - Unexpected {err=}, {type(err)=}")
+        finally:
+            print("Vulture_Tool.run() - Finalizado")
+            return tools_status.FINISHED
+
+    def get_charts(self, analysis_tool):
+        path_result = analysis_tool.get_path_result_analysis()+self.name
+        list_of_charts = []
+        path_to_file = path_result+"/result.txt"
+        print(f"path to file: {path_to_file}")
+        if(not os.path.exists(path_to_file)):
+            return list_of_charts
+        messages=["unused method","unused variable","unused attribute","unused class","unused import","unused function"]
+        counter = {message: 0 for message in messages}
+        with open(path_to_file, 'r') as archivo:
+            for line in archivo:
+                for message in messages:
+                    if message in line:
+                        counter[message] += 1
+        
+        list_of_charts.append(Chart('Vulture-Unused-Items', 6, Chart.BAR, 'Unused Items', json.dumps(messages), counter))
+                
+        return list_of_charts
+    
+    def get_indicators(self, analysis_tool):
+        path_result = analysis_tool.get_path_result_analysis()+self.name
+        list_of_indicators = []
+        path_to_file = path_result+"/result.txt"
+        if(not os.path.exists(path_to_file)):
+            return list_of_indicators
+        totalUnusedItems=0
+        with open(path_to_file) as contenido:
+            lines = contenido.readlines()
+            totalUnusedItems = len(lines)
+                
+
+        list_of_indicators.append(Indicator("vulture-unused-items", "# of Usused Items", 3, totalUnusedItems, Indicator.DEFAULT, 0, 0, 0, 0))
+        #list_of_indicators.append(Indicator("radon-line-of-comments", "# of lines of Comments", 3, totalComments, Indicator.DEFAULT, 0, 0, 0, 0))
+        return list_of_indicators
+
+class Radon_Tool(Tool):
+
+    def __init__(self):
+        """init"""
+        self.name="Radon"
+        self.class_name="Radon_Tool"
+    class Meta:
+        managed = False
+        db_table = 'python_code_analyzer_app_tool'
+
+    def run(self, analysis_tool):
+        path_result = analysis_tool.get_path_result_analysis()+self.name
+        repository_path = analysis_tool.get_path_repository()
+        if not os.path.exists(path_result):
+            os.makedirs(path_result)
+        file_result_cc = os.path.join(path_result,"result_cc.txt")
+        file_result_mi = os.path.join(path_result,"result_mi.json")
+        file_result_raw = os.path.join(path_result,"result_raw.json")
+
+        try:
+            with open(file_result_cc,"wb") as out:
+                result = subprocess.run(["radon","cc", '-s', '-a', repository_path], stdout=out, shell=True)
+            with open(file_result_mi,"wb") as out:
+                result = subprocess.run(["radon","mi", '-s', '-j', repository_path], stdout=out, shell=True)
+            with open(file_result_raw,"wb") as out:
+                result = subprocess.run(["radon","raw", '-s', '-j', repository_path], stdout=out, shell=True)
+
+        except BaseException as err:
+            print(f"Radon_Tool.run() - Unexpected {err=}, {type(err)=}")
+        finally:
+            print("Radon_Tool.run() - Finalizado")
+            return tools_status.FINISHED
+
+    def get_cc_charts(self, path_result):
+        list_of_charts = []
+        path_to_file = path_result+"/result_cc.json"
+        if(not os.path.exists(path_to_file)):
+            return list_of_charts
+        ranks=[0,0,0,0,0,0]
+        labels = ["A","B","C","D","E","F"]
+        with open(path_to_file) as contenido:
+            clases = json.load(contenido)
+            for clase in clases:
+                values = clases[clase]
+                for value in values:
+                    if "rank" in values:
+                        ranks[labels.index(value["rank"])]+=1
+        chart=Chart('Radon-CC', 6, Chart.DOUGHNUT, 'Cyclomatic Complexity', json.dumps(labels), ranks)
+        list_of_charts.append(chart)
+        return list_of_charts
+
+    def get_mi_charts(self, path_result):
+        list_of_charts = []
+        path_to_file = path_result+"/result_mi.json"
+        if(not os.path.exists(path_to_file)):
+            return list_of_charts
+        files=[]
+        mis=[]
+        with open(path_to_file) as contenido:
+            datos = json.load(contenido)
+            for dato in datos:
+                files.append(dato.rsplit('\\', 1)[1])
+                values = datos[dato]
+                if "mi" in values:
+                    mis.append(values["mi"])
+                #mis.append(values.get("mi"))
+        chart=Chart('Radon-MI', 12, Chart.BAR, 'Modificability Index by Module', json.dumps(files), mis, 150)
+        list_of_charts.append(chart)
+        return list_of_charts
+
+    def get_raw_charts(self, path_result):
+        list_of_charts = []
+        path_to_file = path_result+"/result_raw.json"
+        if(not os.path.exists(path_to_file)):
+            return list_of_charts
+        files=[]
+        comments=[]
+        with open(path_to_file) as contenido:
+            datos = json.load(contenido)
+            for dato in datos:
+                files.append(dato.rsplit('\\', 1)[1])
+                values = datos[dato]
+                if "comments" in values:
+                    comments.append(values["comments"])
+        chart=Chart('Radon-RAW', 6, Chart.BAR, 'Radon - RAW', json.dumps(files), comments)
+        list_of_charts.append(chart)
+        return list_of_charts
+
+    def get_charts(self, analysis_tool):
+        path_result = analysis_tool.get_path_result_analysis()+self.name
+        list_of_charts = []
+        list_of_charts += self.get_cc_charts(path_result)
+        list_of_charts += self.get_mi_charts(path_result)
+        #list_of_charts += self.get_raw_charts(path_result)
+        
+        return list_of_charts
+    
+    def _get_raw_indicators(self, path_result):
+        list_of_indicators = []
+        path_to_file = path_result+"/result_raw.json"
+        if(not os.path.exists(path_to_file)):
+            return list_of_indicators
+        totalLOC=0
+        totalComments=0
+        with open(path_to_file) as contenido:
+            datos = json.load(contenido)
+            for dato in datos:
+                values = datos[dato]
+                if "loc" in values:
+                    totalLOC+=values["loc"]
+                if "multi" in values and "single_comments" in values:
+                    totalComments+=values["multi"] + values["single_comments"]
+
+        list_of_indicators.append(Indicator("radon-line-of-code", "# of lines of Code", 3, totalLOC, Indicator.DEFAULT, 0, 0, 0, 0))
+        list_of_indicators.append(Indicator("radon-line-of-comments", "# of lines of Comments", 3, totalComments, Indicator.DEFAULT, 0, 0, 0, 0))
+        
+        return list_of_indicators
+    
+    def _get_cc_indicators(self, path_result):
+        list_of_indicators = []
+        path_to_file = path_result+"/result_cc.txt"
+        if(not os.path.exists(path_to_file)):
+            return list_of_indicators
+        with open(path_to_file, "r") as f:
+            content = f.read()
+
+        match = re.search(r"Average complexity: ([A-Z]) \((\d+\.\d+)\)", content)
+        if match:
+            rank = match.group(1)
+            value = round(float(match.group(2)), 2)
+            # list_of_indicators.append(Indicator("radon-cyclomatic-complexity", "Cyclomatic Complexity", 3, '<h1 style="color: red;">'+rank+' ('+str(value)+')<h1>' , "color: red;"))
+            list_of_indicators.append(Indicator("radon-cyclomatic-complexity", "Cyclomatic Complexity", 3, rank+' ('+str(value)+')', Indicator.DEFAULT, 0, 0, 0, 0))
+        
+        return list_of_indicators
+
+    def get_indicators(self, analysis_tool):
+        path_result = analysis_tool.get_path_result_analysis()+self.name
+        list_of_indicators = []
+        
+                
+        list_of_indicators+=self._get_raw_indicators(path_result)
+        list_of_indicators+=self._get_cc_indicators(path_result)
+        
+        return list_of_indicators
