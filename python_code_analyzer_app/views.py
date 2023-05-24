@@ -3,9 +3,11 @@ import os
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404
+
+from python_code_analyzer_app.TaskManager import TaskManager
 # from django.htpp import StreamingHttpResponse
 # from WSGIREF.UTIL import FileWrapper
-from .tasks import excecute_analysis, launch_massive_upload
+#from .tasks import excecute_analysis, launch_massive_upload
 from python_code_analyzer.celery import app
 
 from .models import Repository, Analysis, Tool, AnalysisTool, CeleryTaskSignal
@@ -70,7 +72,7 @@ def massive_upload(request):
             with open("C:/tesis/git/massive.txt", 'wb+') as destination:
                 for chunk in f.chunks():
                     destination.write(chunk)
-            task_id = launch_massive_upload.apply_async(("C:/tesis/git/massive.txt",request.user.id,),countdown=5,queue='repository_queue')
+            task_id = TaskManager.launch_massive_upload.apply_async(("C:/tesis/git/massive.txt",request.user.id,),countdown=5,queue='repository_queue')
             return redirect('python_code_analyzer_app:repositories')
     else:
         form = UploadFileForm()
@@ -105,7 +107,7 @@ def new_analysis(request, repository_id):
                     at.save()
             # launch asynchronous task
             print(f"new_analysis - launching the task")
-            task_id = excecute_analysis.apply_async((new_analysis.id,),countdown=5)
+            task_id = TaskManager.excecute_analysis.apply_async((new_analysis.id,),countdown=5)
             print(f"new_analysis - saving task_id = {task_id}")
             new_analysis.task_id=task_id
             new_analysis.save()
