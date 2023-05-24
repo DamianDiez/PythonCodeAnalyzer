@@ -369,7 +369,7 @@ class Pylint_Tool(Tool):
                 None
             else:#el caso de que sea la continuación del mensaje
                 if line != "":
-                    detail['message'] = detail['message'] + line;
+                    detail['message'] = detail['message'] + line
                 
 
         result = {'details': details, 
@@ -437,9 +437,9 @@ class Pylint_Tool(Tool):
     def __get_messages_by_module(self, datos):
         charts = []
         tipos = [x['type'] for x in datos]
-        tipos=sorted(list(set(tipos)),key=str.lower);
+        tipos=sorted(list(set(tipos)),key=str.lower)
         modulos = [x['module'] for x in datos]
-        modulos=sorted(list(set(modulos)),key=str.lower);
+        modulos=sorted(list(set(modulos)),key=str.lower)
         all_values = []
         for tipo in tipos:
             valores = self.__get_number_of_msg_type_by_module( tipo, datos, modulos)		
@@ -487,7 +487,7 @@ class Pylint_Tool(Tool):
         list_of_indicators.append(Indicator("pylint-rating", "Rating", 3, rating["current"], Indicator.RATING, 10, 4.0, 7.0, 9.0))
         details = datos['details']
         modulos = [x['module'] for x in details]
-        modulos=sorted(list(set(modulos)),key=str.lower);
+        modulos=sorted(list(set(modulos)),key=str.lower)
         list_of_indicators.append(Indicator("pylint-modules", "# of Modules", 3, len(modulos), Indicator.DEFAULT, 10, 4.0, 7.0, 9.0))
         
         return list_of_indicators

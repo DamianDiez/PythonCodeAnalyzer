@@ -82,7 +82,7 @@ def massive_upload(request):
 def new_analysis(request, repository_id):
     """Add a new analysis for a particular repository."""
     repository = Repository.objects.get(id=repository_id)
-    all_tools = Tool.objects.all();
+    all_tools = Tool.objects.all()
 
  
     if request.method != 'POST':

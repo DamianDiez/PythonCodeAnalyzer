@@ -89,7 +89,7 @@ class TaskManager:
 
                 #agrego un analisis
                 print("launch_massive_upload - Busco todas las tools")
-                all_tools = Tool.objects.all();
+                all_tools = Tool.objects.all()
                 print("launch_massive_upload - Creo el analysis")
                 new_analysis = Analysis()
                 new_analysis.repository = repository
