@@ -1,8 +1,10 @@
 import os
+from django.conf import settings
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404
+from python_code_analyzer_app.LayoutManager import LayoutManager
 
 from python_code_analyzer_app.TaskManager import TaskManager
 # from django.htpp import StreamingHttpResponse
@@ -119,13 +121,12 @@ def new_analysis(request, repository_id):
 @login_required
 def analysis(request, analysis_id):
     """Show a single analysis detail"""
-    list_of_charts = []
     analysis = Analysis.objects.get(id=analysis_id)
-    indicators=analysis.get_indicators()
-    result_list=analysis.get_charts()
-    list_of_charts=list_of_charts + result_list
-
-    context = {'analysis': analysis, 'list_of_charts': list_of_charts, 'list_of_indicators': indicators}
+    result_items=[]
+    result_items=analysis.get_result()
+    criteria_list = settings.CRITERIA_LIST
+    result_items_ordered = LayoutManager.sort_by_multiple_criteria(result_items,criteria_list)
+    context = {'analysis': analysis, 'result_items': result_items_ordered}
     return render(request, 'python_code_analyzer_app/analysis.html', context)
 
 @login_required

@@ -13,9 +13,9 @@ class Chart(ResultItem):
     RADAR = "radar"
     SCATTER = "scatter"
 
-    def __init__(self, _id, _size, _type, _label, _xLabels, _data, _height=400, _display_legend='true', _yLabels=[]):
+    def __init__(self, _id, _size, _template, _tool_name, _type, _label, _xLabels, _data, _height=400, _display_legend='true', _yLabels=[]):
         """init"""
-        super().__init__(_id, _label, _size)
+        super().__init__(_id, _label, _size, _template, _tool_name)
         self.type = _type
         self.xLabels = _xLabels
         self.yLabels = _yLabels

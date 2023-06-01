@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from datetime import datetime
 import os, shutil, stat, json, subprocess, re, contextlib
 from time import sleep
+from python_code_analyzer_app.tools.ResultItem import Template, SizeOptions
 from python_code_analyzer_app.tools.chart_class import Chart
 from python_code_analyzer_app.tools.indicator_class import Indicator
 from .tools import tools_status
@@ -108,10 +109,7 @@ class Tool(models.Model):
     def run(self, analysis_tool):
         pass
 
-    def get_charts(self, analysis_tool):
-        pass
-    
-    def get_indicators(self, analysis_tool):
+    def get_result(self, analysis_tool):
         pass
 
 class Analysis(models.Model):
@@ -204,6 +202,13 @@ class Analysis(models.Model):
         for tool in tools:
             indicators += tool.get_indicators()
         return indicators
+    
+    def get_result(self):
+        tools = self.analysistool_set.all()
+        result_items=[]
+        for tool in tools:
+            result_items += tool.get_result()
+        return result_items
 
 class AnalysisTool(models.Model):
     analysis = models.ForeignKey(Analysis, on_delete=models.CASCADE)
@@ -236,6 +241,13 @@ class AnalysisTool(models.Model):
             return []
         indicators = instancia.get_indicators(self)
         return indicators
+    
+    def get_result(self):
+        instancia = self.tool.get_instance()
+        if(instancia == None):
+            return []
+        result_items = instancia.get_result(self)
+        return result_items
     
     def get_path_result_analysis(self):
         analysis = Analysis.objects.get(id=self.analysis.id)
@@ -410,7 +422,7 @@ class Pylint_Tool(Tool):
         valores = []
         for tipo in tipos:
             valores.append( sum(x['type']==tipo for x in datos) )
-        chart=Chart('Pylint-types', 6, Chart.BAR, '# of Messages by Type', tipos, valores)
+        chart=Chart('Pylint-types', SizeOptions.MEDIUM, Template.CHART_DEFAULT, Tool.PYLINT, Chart.BAR, '# of Messages by Type', tipos, valores)
         return chart
 
     def __get_number_of_messages_by_symbol(self,datos):
@@ -423,7 +435,7 @@ class Pylint_Tool(Tool):
         display_legend = True
         if len(symbol)>10:
             display_legend = 'false'
-        chart=Chart('Pylint-symbols', 6, Chart.PIE, 'Pylint - Tipos de mensaje', symbols, valores, 400, display_legend)
+        chart=Chart('Pylint-symbols', SizeOptions.MEDIUM, Template.CHART_DEFAULT, Tool.PYLINT, Chart.PIE, 'Pylint - Tipos de mensaje', symbols, valores, 400, display_legend)
         return chart
 
     def __get_number_of_msg_type_by_module(self, msg_type, datos, modulos):
@@ -450,7 +462,7 @@ class Pylint_Tool(Tool):
             # charts.append(chart)
         
         
-        charts.insert(0,Chart(f"Pylint-heatmap-module", 12, Chart.MATRIX, f'Heatmap by Module', modulos, all_values,100, 'false', tipos))
+        charts.insert(0,Chart(f"Pylint-heatmap-module", SizeOptions.LARGE, Template.CHART_MATRIX, Tool.PYLINT, Chart.MATRIX, f'Heatmap by Module', modulos, all_values,100, 'false', tipos))
             
 
         return charts
@@ -484,13 +496,20 @@ class Pylint_Tool(Tool):
             datos = json.load(contenido)
         
         rating = datos['rating']
-        list_of_indicators.append(Indicator("pylint-rating", "Rating", 3, rating["current"], Indicator.RATING, 10, 4.0, 7.0, 9.0))
+        list_of_indicators.append(Indicator("pylint-rating", "Rating", SizeOptions.SMALL, rating["current"], Template.INDICATOR_RATING, Tool.PYLINT, Indicator.RATING, 10, 4.0, 7.0, 9.0))
         details = datos['details']
         modulos = [x['module'] for x in details]
         modulos=sorted(list(set(modulos)),key=str.lower)
-        list_of_indicators.append(Indicator("pylint-modules", "# of Modules", 3, len(modulos), Indicator.DEFAULT, 10, 4.0, 7.0, 9.0))
+        list_of_indicators.append(Indicator("pylint-modules", "# of Modules", SizeOptions.SMALL, len(modulos), Template.INDICATOR_DEFAULT, Tool.PYLINT, Indicator.DEFAULT, 10, 4.0, 7.0, 9.0))
         
         return list_of_indicators
+    
+    def get_result(self, analysis_tool):
+        result_items=[]
+        result_items+=self.get_indicators(analysis_tool)
+        result_items+=self.get_charts(analysis_tool)
+        
+        return result_items
 
 class Vulture_Tool(Tool):
 
@@ -537,8 +556,8 @@ class Vulture_Tool(Tool):
                     if message in line:
                         counter[message] += 1
         
-        list_of_charts.append(Chart('Vulture-Unused-Items', 6, Chart.BAR, 'Unused Items', json.dumps(messages), counter))
-                
+        list_of_charts.append(Chart('Vulture-Unused-Items', SizeOptions.MEDIUM, Template.CHART_DEFAULT, Tool.VULTURE, Chart.BAR, 'Unused Items', json.dumps(messages), counter))
+
         return list_of_charts
     
     def get_indicators(self, analysis_tool):
@@ -553,9 +572,17 @@ class Vulture_Tool(Tool):
             totalUnusedItems = len(lines)
                 
 
-        list_of_indicators.append(Indicator("vulture-unused-items", "# of Usused Items", 3, totalUnusedItems, Indicator.DEFAULT, 0, 0, 0, 0))
+        list_of_indicators.append(Indicator("vulture-unused-items", "# of Usused Items", SizeOptions.SMALL, totalUnusedItems, Template.INDICATOR_DEFAULT, Tool.VULTURE, Indicator.DEFAULT, 0, 0, 0, 0))
         #list_of_indicators.append(Indicator("radon-line-of-comments", "# of lines of Comments", 3, totalComments, Indicator.DEFAULT, 0, 0, 0, 0))
         return list_of_indicators
+    
+    def get_result(self, analysis_tool):
+        result_items=[]
+        result_items+=self.get_indicators(analysis_tool)
+        result_items+=self.get_charts(analysis_tool)
+        
+        return result_items
+
 
 class Radon_Tool(Tool):
 
@@ -604,7 +631,7 @@ class Radon_Tool(Tool):
                 for value in values:
                     if "rank" in values:
                         ranks[labels.index(value["rank"])]+=1
-        chart=Chart('Radon-CC', 6, Chart.DOUGHNUT, 'Cyclomatic Complexity', json.dumps(labels), ranks)
+        chart=Chart('Radon-CC', SizeOptions.MEDIUM, Template.CHART_DEFAULT, Tool.RADON, Chart.DOUGHNUT, 'Cyclomatic Complexity', json.dumps(labels), ranks)
         list_of_charts.append(chart)
         return list_of_charts
 
@@ -623,7 +650,7 @@ class Radon_Tool(Tool):
                 if "mi" in values:
                     mis.append(values["mi"])
                 #mis.append(values.get("mi"))
-        chart=Chart('Radon-MI', 12, Chart.BAR, 'Modificability Index by Module', json.dumps(files), mis, 150)
+        chart=Chart('Radon-MI', 12, Template.CHART_DEFAULT, Tool.RADON, Chart.BAR, 'Modificability Index by Module', json.dumps(files), mis, 150)
         list_of_charts.append(chart)
         return list_of_charts
 
@@ -641,7 +668,7 @@ class Radon_Tool(Tool):
                 values = datos[dato]
                 if "comments" in values:
                     comments.append(values["comments"])
-        chart=Chart('Radon-RAW', 6, Chart.BAR, 'Radon - RAW', json.dumps(files), comments)
+        chart=Chart('Radon-RAW', SizeOptions.MEDIUM, Template.CHART_DEFAULT, Tool.RADON, Chart.BAR, 'Radon - RAW', json.dumps(files), comments)
         list_of_charts.append(chart)
         return list_of_charts
 
@@ -670,8 +697,8 @@ class Radon_Tool(Tool):
                 if "multi" in values and "single_comments" in values:
                     totalComments+=values["multi"] + values["single_comments"]
 
-        list_of_indicators.append(Indicator("radon-line-of-code", "# of lines of Code", 3, totalLOC, Indicator.DEFAULT, 0, 0, 0, 0))
-        list_of_indicators.append(Indicator("radon-line-of-comments", "# of lines of Comments", 3, totalComments, Indicator.DEFAULT, 0, 0, 0, 0))
+        list_of_indicators.append(Indicator("radon-line-of-code", "# of lines of Code", SizeOptions.SMALL, totalLOC, Template.INDICATOR_DEFAULT, Tool.RADON, Indicator.DEFAULT, 0, 0, 0, 0))
+        list_of_indicators.append(Indicator("radon-line-of-comments", "# of lines of Comments", SizeOptions.SMALL, totalComments, Template.INDICATOR_DEFAULT, Tool.RADON, Indicator.DEFAULT, 0, 0, 0, 0))
         
         return list_of_indicators
     
@@ -688,7 +715,7 @@ class Radon_Tool(Tool):
             rank = match.group(1)
             value = round(float(match.group(2)), 2)
             # list_of_indicators.append(Indicator("radon-cyclomatic-complexity", "Cyclomatic Complexity", 3, '<h1 style="color: red;">'+rank+' ('+str(value)+')<h1>' , "color: red;"))
-            list_of_indicators.append(Indicator("radon-cyclomatic-complexity", "Cyclomatic Complexity", 3, rank+' ('+str(value)+')', Indicator.DEFAULT, 0, 0, 0, 0))
+            list_of_indicators.append(Indicator("radon-cyclomatic-complexity", "Cyclomatic Complexity", SizeOptions.SMALL, rank+' ('+str(value)+')', Template.INDICATOR_DEFAULT, Tool.RADON, Indicator.DEFAULT, 0, 0, 0, 0))
         
         return list_of_indicators
 
@@ -701,3 +728,10 @@ class Radon_Tool(Tool):
         list_of_indicators+=self._get_cc_indicators(path_result)
         
         return list_of_indicators
+    
+    def get_result(self, analysis_tool):
+        result_items=[]
+        result_items+=self.get_indicators(analysis_tool)
+        result_items+=self.get_charts(analysis_tool)
+        
+        return result_items

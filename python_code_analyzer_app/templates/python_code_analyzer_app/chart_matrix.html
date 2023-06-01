@@ -1,0 +1,76 @@
+<div class="col-sm-{{item.size}}">
+    <div class="card" style="margin-bottom: 20px;">
+        <div class="card-header text-light" style="background-color: #212529;">
+        {{ item.label }}
+        </div>
+        <div class="card-body">
+        <canvas id="{{ item.id }}" width="400" height="{{ item.height }}"></canvas>    
+        </div>
+    </div>
+</div>
+
+<script>
+    var ctx;
+    var myChart;
+    ctx = document.getElementById("{{item.id}}").getContext('2d');
+    myChart = new Chart(ctx, {
+        type: 'matrix',
+        
+        data: {
+            datasets: [{
+            data: {{ item.data|safe }},
+            backgroundColor: function (context) {
+                var value = context.dataset.data[context.dataIndex].v;
+                var msgType = context.dataset.data[context.dataIndex].y;
+                let alpha = 2 * value / 50.0;
+                if(msgType == 'warning')
+                    return `rgba(0,200,0,${alpha})`;
+                if(msgType == 'refactor')
+                    return `rgba(255,255,0,${alpha})`;
+                if(msgType == 'convention')
+                    return `rgba(0,0,200,${alpha})`;
+                return `rgba(255,0,0,${alpha})`;
+            },
+            borderWidth: 0,
+            borderColor: '#fff',
+            width: ({chart}) => (chart.chartArea || {}).width / {{ item.xLabels|safe }}.length - 1,
+            height: ({chart}) => (chart.chartArea || {}).height / {{ item.yLabels|safe }}.length - 1,
+            }]
+        },
+        options: {
+            scales:{
+                x:{
+                    labels: {{ item.xLabels|safe }},
+                    type: 'category',
+                    grid: {
+                        display: false,
+                        drawBorder: false,
+                        tickLength: 0
+                    }
+                },
+                y:{
+                    labels: {{ item.yLabels|safe }},
+                    type: 'category',
+                    offset: true,
+                    grid: {
+                        display: false,
+                        drawBorder: false,
+                        tickLength: 0
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            return tooltipItem.raw.v == null ? ' 0' : ' '+tooltipItem.raw.v+' '+tooltipItem.raw.y+'s';
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>

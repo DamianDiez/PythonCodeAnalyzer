@@ -1,0 +1,29 @@
+<div class='col-sm-{{item.size}}'>
+    <div class="card" style="margin-bottom: 20px;">
+        <div class="card-header text-light" style="background-color: #212529;">
+            {{ item.label }}
+        </div>
+        <div class="card-body text-dark text-center">
+            <div id="{{ item.id }}"> </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getColor(value, bad, regular, good){
+        if(value < bad)
+            return "red"
+        if(value < regular)
+            return "orange"
+        if(value < good)
+            return "yellow"
+        return "green"
+    }
+    var div;
+    var color;
+    
+        div = document.getElementById("{{item.id}}");
+        color = getColor( {{item.value}} ,{{item.bad}}, {{item.regular}}, {{item.good}});
+        div.innerHTML = `<h1><span style="color: ${color};">{{item.value}}</span>/10</h1>`;
+
+</script>

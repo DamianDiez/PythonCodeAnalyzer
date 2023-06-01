@@ -5,9 +5,9 @@ class Indicator(ResultItem):
     RATING = "rating"
     DEFAULT = "default"
 
-    def __init__(self, _id, _label, _size, _value, _type, _max, _bad, _regular, _good):
+    def __init__(self, _id, _label, _size, _value, _template, _tool_name, _type, _max, _bad, _regular, _good):
         """init"""
-        super().__init__(_id, _label, _size)
+        super().__init__(_id, _label, _size, _template, _tool_name)
         self.value = _value
         self.type = _type
         self.max = _max
