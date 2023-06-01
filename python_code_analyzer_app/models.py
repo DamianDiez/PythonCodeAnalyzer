@@ -3,9 +3,10 @@ from django.contrib.auth.models import User
 from datetime import datetime
 import os, shutil, stat, json, subprocess, re, contextlib
 from time import sleep
+from python_code_analyzer_app.tools.IdicatorDefault import IndicatorDefault
+from python_code_analyzer_app.tools.IndicatorRating import IndicatorRating
 from python_code_analyzer_app.tools.ResultItem import Template, SizeOptions
 from python_code_analyzer_app.tools.chart_class import Chart
-from python_code_analyzer_app.tools.indicator_class import Indicator
 from .tools import tools_status
 import vulture
 
@@ -496,11 +497,11 @@ class Pylint_Tool(Tool):
             datos = json.load(contenido)
         
         rating = datos['rating']
-        list_of_indicators.append(Indicator("pylint-rating", "Rating", SizeOptions.SMALL, rating["current"], Template.INDICATOR_RATING, Tool.PYLINT, Indicator.RATING, 10, 4.0, 7.0, 9.0))
+        list_of_indicators.append(IndicatorRating("pylint-rating", "Rating", SizeOptions.SMALL, rating["current"], Tool.PYLINT, 10, 4.0, 7.0, 9.0))
         details = datos['details']
         modulos = [x['module'] for x in details]
         modulos=sorted(list(set(modulos)),key=str.lower)
-        list_of_indicators.append(Indicator("pylint-modules", "# of Modules", SizeOptions.SMALL, len(modulos), Template.INDICATOR_DEFAULT, Tool.PYLINT, Indicator.DEFAULT, 10, 4.0, 7.0, 9.0))
+        list_of_indicators.append(IndicatorDefault("pylint-modules", "# of Modules", SizeOptions.SMALL, len(modulos), Tool.PYLINT))
         
         return list_of_indicators
     
@@ -572,7 +573,7 @@ class Vulture_Tool(Tool):
             totalUnusedItems = len(lines)
                 
 
-        list_of_indicators.append(Indicator("vulture-unused-items", "# of Usused Items", SizeOptions.SMALL, totalUnusedItems, Template.INDICATOR_DEFAULT, Tool.VULTURE, Indicator.DEFAULT, 0, 0, 0, 0))
+        list_of_indicators.append(IndicatorDefault("vulture-unused-items", "# of Usused Items", SizeOptions.SMALL, totalUnusedItems, Tool.VULTURE))
         #list_of_indicators.append(Indicator("radon-line-of-comments", "# of lines of Comments", 3, totalComments, Indicator.DEFAULT, 0, 0, 0, 0))
         return list_of_indicators
     
@@ -650,7 +651,7 @@ class Radon_Tool(Tool):
                 if "mi" in values:
                     mis.append(values["mi"])
                 #mis.append(values.get("mi"))
-        chart=Chart('Radon-MI', 12, Template.CHART_DEFAULT, Tool.RADON, Chart.BAR, 'Modificability Index by Module', json.dumps(files), mis, 150)
+        chart=Chart('Radon-MI', SizeOptions.LARGE, Template.CHART_DEFAULT, Tool.RADON, Chart.BAR, 'Modificability Index by Module', json.dumps(files), mis, 150)
         list_of_charts.append(chart)
         return list_of_charts
 
@@ -697,8 +698,8 @@ class Radon_Tool(Tool):
                 if "multi" in values and "single_comments" in values:
                     totalComments+=values["multi"] + values["single_comments"]
 
-        list_of_indicators.append(Indicator("radon-line-of-code", "# of lines of Code", SizeOptions.SMALL, totalLOC, Template.INDICATOR_DEFAULT, Tool.RADON, Indicator.DEFAULT, 0, 0, 0, 0))
-        list_of_indicators.append(Indicator("radon-line-of-comments", "# of lines of Comments", SizeOptions.SMALL, totalComments, Template.INDICATOR_DEFAULT, Tool.RADON, Indicator.DEFAULT, 0, 0, 0, 0))
+        list_of_indicators.append(IndicatorDefault("radon-line-of-code", "# of lines of Code", SizeOptions.SMALL, totalLOC, Tool.RADON))
+        list_of_indicators.append(IndicatorDefault("radon-line-of-comments", "# of lines of Comments", SizeOptions.SMALL, totalComments, Tool.RADON))
         
         return list_of_indicators
     
@@ -715,7 +716,7 @@ class Radon_Tool(Tool):
             rank = match.group(1)
             value = round(float(match.group(2)), 2)
             # list_of_indicators.append(Indicator("radon-cyclomatic-complexity", "Cyclomatic Complexity", 3, '<h1 style="color: red;">'+rank+' ('+str(value)+')<h1>' , "color: red;"))
-            list_of_indicators.append(Indicator("radon-cyclomatic-complexity", "Cyclomatic Complexity", SizeOptions.SMALL, rank+' ('+str(value)+')', Template.INDICATOR_DEFAULT, Tool.RADON, Indicator.DEFAULT, 0, 0, 0, 0))
+            list_of_indicators.append(IndicatorDefault("radon-cyclomatic-complexity", "Cyclomatic Complexity", SizeOptions.SMALL, rank+' ('+str(value)+')', Tool.RADON))
         
         return list_of_indicators
 
