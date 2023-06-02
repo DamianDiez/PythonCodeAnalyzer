@@ -1,6 +1,7 @@
 from celery import shared_task
 from django.contrib.auth.models import User
-from .models import Repository, Analysis, AnalysisTool, CeleryTaskSignal, Tool
+
+from .models import Repository, Analysis, AnalysisTool, Tool, CeleryTaskSignal
 from datetime import datetime
 
 class TaskManager:
@@ -12,7 +13,6 @@ class TaskManager:
         analysis = Analysis.objects.get(id=analysis_id)
         print('excecute_analysis - getting repository...')
         repository = Repository.objects.get(id=analysis.repository_id)
-        
         
         if(repository.is_being_analyzed()):
             #loguear que se esta ejecutando otro analisis
@@ -40,11 +40,6 @@ class TaskManager:
         #seteo el commit
         analysis.set_commit(commit)
 
-        # if analysis.was_excecuted():
-        #     status_msg=f'excecute_analysis - an analysis for this commit ({commit}) was executed previously...'
-        #     analysis.cancel(status_msg)
-        #     return False
-
         print(f"excecute_analysis - run - analysis: {analysis} ")
         if (CeleryTaskSignal.is_task_cancelled(analysis)):
             print(f"excecute_analysis - is_task_cancelled True")
@@ -53,10 +48,6 @@ class TaskManager:
         analysis.run()
         
         return True
-        # except:
-        #     print(f"excecute_analysis - error downloading the repository {repository.id}...")
-        #     analysis.cancel()
-        #     return False
 
     @staticmethod
     @shared_task

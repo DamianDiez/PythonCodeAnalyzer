@@ -7,9 +7,6 @@ from django.http import HttpResponse, Http404
 from python_code_analyzer_app.LayoutManager import LayoutManager
 
 from python_code_analyzer_app.TaskManager import TaskManager
-# from django.htpp import StreamingHttpResponse
-# from WSGIREF.UTIL import FileWrapper
-#from .tasks import excecute_analysis, launch_massive_upload
 from python_code_analyzer.celery import app
 
 from .models import Repository, Analysis, Tool, AnalysisTool, CeleryTaskSignal
@@ -188,4 +185,3 @@ def delete_all_repositories(request):
         r.delete_files()
         r.delete()
     return redirect(request.META['HTTP_REFERER'])
-
