@@ -5,7 +5,7 @@ import json
 import os
 import subprocess
 import vulture
-from python_code_analyzer_app.tools import tools_status
+from python_code_analyzer_app.app_models import tools_status
 from python_code_analyzer_app.tools.IdicatorDefault import IndicatorDefault
 from python_code_analyzer_app.tools.IndicatorRating import IndicatorRating
 from python_code_analyzer_app.tools.ResultItem import SizeOptions, Template

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from datetime import datetime
 import os, shutil, stat, subprocess
 
-from python_code_analyzer_app.tools import tools_status
+from python_code_analyzer_app.app_models import tools_status
 
 
 BASE_PATH = "C:/tesis/git/"

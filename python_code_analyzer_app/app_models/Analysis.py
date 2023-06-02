@@ -4,7 +4,7 @@ from django.db import models
 
 from python_code_analyzer_app.app_models.Repository import Repository
 from python_code_analyzer_app.app_models.Tool import Tool
-from python_code_analyzer_app.tools import tools_status
+from python_code_analyzer_app.app_models import tools_status
 
 class Analysis(models.Model):
     """Analisis de un repositorio"""

@@ -4,9 +4,9 @@ from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404
-from python_code_analyzer_app.LayoutManager import LayoutManager
+from python_code_analyzer_app.app_layout_classes.LayoutManager import LayoutManager
 
-from python_code_analyzer_app.TaskManager import TaskManager
+from python_code_analyzer_app.app_models.TaskManager import TaskManager
 from python_code_analyzer.celery import app
 
 from .models import Repository, Analysis, Tool, AnalysisTool, CeleryTaskSignal
