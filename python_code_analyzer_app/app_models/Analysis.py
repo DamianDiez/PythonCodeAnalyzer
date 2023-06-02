@@ -81,21 +81,6 @@ class Analysis(models.Model):
     def was_excecuted(self):
         analysis_related = Analysis.objects.filter(commit=self.commit, status=tools_status.FINISHED)
         return len(analysis_related) > 0
-
-    def get_charts(self):
-        tools = self.analysistool_set.all()
-        charts=[]
-        for tool in tools:
-            print(tool)
-            charts += tool.get_charts()
-        return charts
-    
-    def get_indicators(self):
-        tools = self.analysistool_set.all()
-        indicators=[]
-        for tool in tools:
-            indicators += tool.get_indicators()
-        return indicators
     
     def get_result(self):
         tools = self.analysistool_set.all()
