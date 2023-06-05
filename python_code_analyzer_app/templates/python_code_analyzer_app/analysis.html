@@ -3,10 +3,11 @@
 {% block page_header %}
 <nav class="navbar navbar-dark bg-dark">
 	<a  href="javascript:history.go(-1);"  class="btn btn-dark" title="Back"><i class="fa fa-arrow-left"></i></a>
-	<span class="navbar-brand h5">Analysis name: <span style="background-color: #5c5c5c">{{ analysis }}</span></span>
+	<span class="navbar-brand h5">Analysis id: <span style="background-color: #5c5c5c">{{ analysis.id }}</span></span>
+	<span class="nav-item">Commit: <span style="background-color: #5c5c5c">{{ analysis.commit }}</span></span>
 	<span class="nav-item">Status: <span style="background-color: #5c5c5c">{{ analysis.status }}</span></span>
 	<span class="nav-item">Date: <span style="background-color: #5c5c5c">{{ analysis.date_added }}</span></span>
-	<span class="nav-item">End Date: <span style="background-color: #5c5c5c">{{ analysis.date_finished }}</span></span>
+	{% comment %} <span class="nav-item">End Date: <span style="background-color: #5c5c5c">{{ analysis.date_finished }}</span></span> {% endcomment %}
 	<span class="nav-item">
 		{% if analysis.status == 'FINISHED' %}
 			<form class="form-inline">

@@ -14,7 +14,7 @@ class Analysis(models.Model):
     date_added = models.DateTimeField(auto_now_add=True) 
     date_finished = models.DateTimeField(auto_now = True, null=True, blank=True)
     task_id = models.CharField(max_length=50, null=False, blank=False, default='null')
-    commit = models.CharField(max_length=40, null=False, blank=False, default='null')
+    commit = models.CharField(max_length=40, null=False, blank=False, default='')
     status_msg = models.CharField(max_length=256, default='null')
 
     class Meta:
