@@ -11,7 +11,6 @@ class Analysis(models.Model):
     repository = models.ForeignKey(Repository, on_delete=models.CASCADE)
     status = models.CharField(max_length=15, choices = tools_status.STATUS_OPTIONS, default=tools_status.PENDING)
     herramientas = models.ManyToManyField(Tool, through='AnalysisTool')
-    result = models.CharField(max_length=256)
     date_added = models.DateTimeField(auto_now_add=True) 
     date_finished = models.DateTimeField(auto_now = True, null=True, blank=True)
     task_id = models.CharField(max_length=50, null=False, blank=False, default='null')

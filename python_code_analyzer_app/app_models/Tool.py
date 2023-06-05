@@ -283,7 +283,6 @@ class Vulture_Tool(Tool):
         path_result = analysis_tool.get_path_result_analysis()+self.name
         list_of_charts = []
         path_to_file = path_result+"/result.txt"
-        print(f"path to file: {path_to_file}")
         if(not os.path.exists(path_to_file)):
             return list_of_charts
         messages=["unused method","unused variable","unused attribute","unused class","unused import","unused function"]
