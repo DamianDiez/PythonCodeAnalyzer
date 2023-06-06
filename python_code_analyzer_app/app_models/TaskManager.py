@@ -38,6 +38,9 @@ class TaskManager:
         repository.download()
         commit = repository.get_last_commit()
         #seteo el commit
+        if (CeleryTaskSignal.is_task_cancelled(analysis)):
+            print(f"excecute_analysis - is_task_cancelled True")
+            return False
         analysis.set_commit(commit)
 
         print(f"excecute_analysis - run - analysis: {analysis} ")
