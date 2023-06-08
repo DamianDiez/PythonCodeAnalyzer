@@ -1,12 +1,10 @@
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import User
 from datetime import datetime
 import os, shutil, stat, subprocess
 
 from python_code_analyzer_app.app_models import tools_status
-
-
-BASE_PATH = "C:/tesis/git/"
 
 def on_rm_error( func, path, exc_info):
     # path contains the path of the file that couldn't be removed
@@ -28,7 +26,7 @@ class Repository(models.Model):
 
     @property
     def path(self):
-        return os.path.join(BASE_PATH,self.folder)
+        return os.path.join(settings.BASE_PATH,self.folder)
 
     def download(self):
         print(f'Repository.donwnload - repository path {self.path}..')

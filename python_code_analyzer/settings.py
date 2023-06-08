@@ -137,3 +137,5 @@ LOGIN_URL = 'users:login'
 CRITERIA_LIST = [
     Criteria(Criteria.SIZE, True),
 ]
+#base path for the repositories
+BASE_PATH = "C:/tesis/git/"
