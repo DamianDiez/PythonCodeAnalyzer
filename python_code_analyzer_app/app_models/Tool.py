@@ -15,14 +15,10 @@ from python_code_analyzer_app.tools.chart_class import Chart
 class Tool(models.Model):
     """Herramienta"""
     PYLINT = 'Pylint'
-    PYSMELL = 'Pysmell'
-    PYREF = 'PyRef'
     VULTURE = 'Vulture'
     RADON = 'Radon'
     TOOL_OPTIONS = (
         (PYLINT, 'pylint'),
-        (PYSMELL, 'pysmell'),
-        (PYREF, 'pyref'),
         (VULTURE, 'vulture'),
         (RADON, 'radon'),
     )
