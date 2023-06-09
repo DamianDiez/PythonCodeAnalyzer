@@ -93,7 +93,6 @@ class TaskManager:
                     at = AnalysisTool()
                     at.analysis = new_analysis
                     at.tool = x
-                    at.default_parameters = True
                     at.save()
                 # lanzar el analisis
                 # launch asynchronous task

@@ -99,11 +99,6 @@ def new_analysis(request, repository_id):
                     at = AnalysisTool()
                     at.analysis = new_analysis
                     at.tool = x
-                    if request.POST.get(f"chk_default-{x.id}")=='clicked':
-                        at.default_parameters = True
-                    else:
-                        at.default_parameters = False
-                        at.parameters = request.POST.get(f"parameters-{x.id}")
                     at.save()
             # launch asynchronous task
             print(f"new_analysis - launching the task")

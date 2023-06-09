@@ -24,11 +24,9 @@ class AnalysisForm(forms.ModelForm):
 class AnalysisToolForm(forms.ModelForm):
     class Meta:
             model = AnalysisTool
-            fields = ['tool','default_parameters','parameters']
+            fields = ['tool']
             labels = {
-                'tool':'Tool',
-                'default_parameters':'Parametos por defecto',
-                'parameters':'Parametros'
+                'tool':'Tool'
             }
 
     # def __init__(self, *args, **kwargs): 

@@ -7,8 +7,6 @@ from python_code_analyzer_app.app_models import tools_status
 class AnalysisTool(models.Model):
     analysis = models.ForeignKey(Analysis, on_delete=models.CASCADE)
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE)
-    default_parameters = models.BooleanField(default=True)
-    parameters = models.CharField(max_length=256, default=None, null=True)
     status = models.CharField(max_length=15, choices = tools_status.STATUS_OPTIONS, default=tools_status.PENDING)
     result = models.CharField(max_length=256, default='')
 
