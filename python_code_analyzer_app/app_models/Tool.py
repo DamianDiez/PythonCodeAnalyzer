@@ -9,7 +9,7 @@ from python_code_analyzer_app.app_models import tools_status
 from python_code_analyzer_app.tools.IdicatorDefault import IndicatorDefault
 from python_code_analyzer_app.tools.IndicatorRating import IndicatorRating
 from python_code_analyzer_app.tools.ResultItem import SizeOptions, Template
-from python_code_analyzer_app.tools.chart_class import Chart
+from python_code_analyzer_app.tools.Chart import Chart
 
 
 class Tool(models.Model):
