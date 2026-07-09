@@ -380,7 +380,7 @@ class Radon_Tool(Tool):
                 values = datos[dato]
                 if "mi" in values:
                     mis.append(values["mi"])
-        chart=Chart('Radon-MI', SizeOptions.LARGE, Template.CHART_DEFAULT, Tool.RADON, Chart.BAR, 'Modificability Index by Module', json.dumps(files), mis, 150)
+        chart=Chart('Radon-MI', SizeOptions.LARGE, Template.CHART_DEFAULT, Tool.RADON, Chart.BAR, 'Maintainability Index by Module', json.dumps(files), mis, 150)
         list_of_charts.append(chart)
         return list_of_charts
 

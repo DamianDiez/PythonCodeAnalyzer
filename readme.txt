@@ -20,6 +20,14 @@
 12) Abrir otra consola como administrador, ir a la carpeta del proyecto, iniciar el virtual env y correr Celery:
 	celery -A python_code_analyzer worker -l info --pool=solo -Q repository_queue -n repository@celery.com
 	Esta es para que se ejecuten de manera separada la insercion de repositorios
-13) Crear un super user
+13) Ejecutar los tests automatizados:
+	python manage.py test
+	python manage.py test --verbosity=2  (para ver el nombre de cada test)
+
+14) Para medir cobertura de codigo (si se instalo coverage):
+	coverage run manage.py test
+	coverage report
+
+15) Crear un super user
 	python manage.py createsuperuser
 	Pide nombre de usuario y password. Recordarlo para poder entrar como administrador y porder crear mas usuarios, configurar tools, etc.
