@@ -34,8 +34,11 @@ class Tool(models.Model):
         return self.name
 
     def get_instance(self):
-        instancia_clase_hija = globals()[self.class_name]()
-        return instancia_clase_hija
+        clase = globals().get(self.class_name)
+        if clase is None:
+            print(f"Tool.get_instance - class '{self.class_name}' not found for tool '{self.name}'")
+            return None
+        return clase()
 
     class Meta:
         abstract = False

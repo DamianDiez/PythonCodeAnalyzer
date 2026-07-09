@@ -172,6 +172,51 @@ class AnalysisToolTest(TestCase):
             self.analysis_tool.refresh_from_db()
             self.assertEqual(self.analysis_tool.status, tools_status.FINISHED)
 
+    def test_run_returns_failed_when_get_instance_returns_none(self):
+        tool = Tool.objects.create(name="Ghost", class_name="NonExistentTool")
+        analysis_tool = AnalysisTool.objects.create(
+            analysis=self.analysis, tool=tool
+        )
+        result = analysis_tool.run()
+        self.assertEqual(result, tools_status.FAILED)
+
+    def test_get_indicators_returns_empty_list_when_get_instance_returns_none(self):
+        tool = Tool.objects.create(name="Ghost", class_name="NonExistentTool")
+        analysis_tool = AnalysisTool.objects.create(
+            analysis=self.analysis, tool=tool
+        )
+        result = analysis_tool.get_indicators()
+        self.assertEqual(result, [])
+
+    def test_get_charts_returns_empty_list_when_get_instance_returns_none(self):
+        tool = Tool.objects.create(name="Ghost", class_name="NonExistentTool")
+        analysis_tool = AnalysisTool.objects.create(
+            analysis=self.analysis, tool=tool
+        )
+        result = analysis_tool.get_charts()
+        self.assertEqual(result, [])
+
+    def test_get_result_returns_empty_list_when_get_instance_returns_none(self):
+        tool = Tool.objects.create(name="Ghost", class_name="NonExistentTool")
+        analysis_tool = AnalysisTool.objects.create(
+            analysis=self.analysis, tool=tool
+        )
+        result = analysis_tool.get_result()
+        self.assertEqual(result, [])
+
+
+class ToolGetInstanceTest(TestCase):
+    def test_get_instance_returns_none_for_nonexistent_class(self):
+        tool = Tool(name="Ghost", class_name="NonExistentTool")
+        instance = tool.get_instance()
+        self.assertIsNone(instance)
+
+    def test_get_instance_returns_instance_for_valid_class(self):
+        tool = Tool(name="Pylint", class_name="Pylint_Tool")
+        instance = tool.get_instance()
+        self.assertIsNotNone(instance)
+        self.assertEqual(instance.name, "Pylint")
+
 
 class CeleryTaskSignalTest(TestCase):
     def setUp(self):
