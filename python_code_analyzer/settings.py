@@ -133,6 +133,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # My settings
 LOGIN_URL = 'users:login'
 
+# Celery settings (defaults to amqp://localhost if not set)
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+CELERY_RESULT_BACKEND = None
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
 # Layout Criteria List
 CRITERIA_LIST = [
     Criteria(Criteria.SIZE, True),
