@@ -1,0 +1,47 @@
+{
+    "details": [
+        {
+            "type": "convention",
+            "module": "sample",
+            "obj": "",
+            "line": 1,
+            "column": 0,
+            "endLine": 1,
+            "endColumn": 0,
+            "path": "sample.py",
+            "symbol": "missing-docstring",
+            "message": "Missing module docstring",
+            "message-id": "C0114"
+        },
+        {
+            "type": "warning",
+            "module": "sample",
+            "obj": "unused_func",
+            "line": 5,
+            "column": 0,
+            "endLine": 5,
+            "endColumn": 0,
+            "path": "sample.py",
+            "symbol": "unused-function",
+            "message": "Unused function 'unused_func'",
+            "message-id": "W0612"
+        },
+        {
+            "type": "warning",
+            "module": "utils",
+            "obj": "",
+            "line": 3,
+            "column": 0,
+            "endLine": 3,
+            "endColumn": 0,
+            "path": "utils.py",
+            "symbol": "unused-import",
+            "message": "Unused import os",
+            "message-id": "W0611"
+        }
+    ],
+    "rating": {
+        "current": 7.5,
+        "previous": 8.2
+    }
+}

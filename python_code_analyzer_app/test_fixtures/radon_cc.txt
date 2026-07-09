@@ -1,0 +1,4 @@
+sample.py
+    F 5:0 myfunc - A (3)
+    F 10:0 complex_func - C (8)
+Average complexity: B (5.50)

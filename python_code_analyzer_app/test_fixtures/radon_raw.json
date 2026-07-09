@@ -1,0 +1,18 @@
+{
+    "folder\\sample.py": {
+        "loc": 50,
+        "lloc": 30,
+        "sloc": 40,
+        "multi": 3,
+        "single_comments": 5,
+        "comments": 8
+    },
+    "folder\\utils.py": {
+        "loc": 30,
+        "lloc": 20,
+        "sloc": 25,
+        "multi": 1,
+        "single_comments": 2,
+        "comments": 3
+    }
+}
