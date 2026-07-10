@@ -48,6 +48,7 @@
  <div class="border-bottom mb-2">
         
  </div>
+ {% block extra_scripts %}{% endblock %}
  <main role="main" class="container">
     <div>
         {% block page_header %}{% endblock page_header %}
@@ -95,7 +96,6 @@
     </div>
   </div>
  {% bootstrap_javascript jquery='full' %}
- {% block extra_scripts %}{% endblock %}
  <script type="text/javascript">
       $(document).ready(function(){
         {% block jquery %} {% endblock %}
