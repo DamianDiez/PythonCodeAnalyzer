@@ -144,4 +144,4 @@ CRITERIA_LIST = [
     Criteria(Criteria.SIZE, True),
 ]
 #base path for the repositories
-BASE_PATH = "C:/tesis/git/"
+BASE_PATH = str(BASE_DIR / "analyzer_data")
