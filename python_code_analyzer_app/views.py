@@ -1,4 +1,5 @@
 import os
+import uuid
 from django.conf import settings
 
 from django.shortcuts import render, redirect
@@ -68,11 +69,11 @@ def massive_upload(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             f = request.FILES['file']
-            txt_file=os.path.join(settings.BASE_PATH,"massive.txt")
+            txt_file=os.path.join(settings.BASE_PATH, f"massive_{request.user.id}_{uuid.uuid4().hex}.txt")
             with open(txt_file, 'wb+') as destination:
                 for chunk in f.chunks():
                     destination.write(chunk)
-            task_id = TaskManager.launch_massive_upload.apply_async((txt_file,request.user.id,),countdown=5,queue='repository_queue')
+            TaskManager.launch_massive_upload.apply_async((txt_file,request.user.id,),countdown=5,queue='repository_queue')
             return redirect('python_code_analyzer_app:repositories')
     else:
         form = UploadFileForm()
