@@ -2,55 +2,59 @@ from celery import shared_task
 from django.contrib.auth.models import User
 
 from ..models import Repository, Analysis, AnalysisTool, Tool, CeleryTaskSignal
+from ..app_models import tools_status
 from datetime import datetime
 
 class TaskManager:
     @staticmethod
     @shared_task
     def excecute_analysis(analysis_id):
-        #chequear que no haya corriendo un analisis para el mismo repositorio
-        print('start excecute_analysis - getting analysis...')
-        analysis = Analysis.objects.get(id=analysis_id)
-        print('excecute_analysis - getting repository...')
-        repository = Repository.objects.get(id=analysis.repository_id)
-        
-        if(repository.is_being_analyzed()):
-            #loguear que se esta ejecutando otro analisis
-            status_msg=f'excecute_analysis - an analysis is already executing for this repository {repository.id}...'
-            print(status_msg)
-            #cancelar la ejecucion de este
-            analysis.cancel(status_msg)
-            return False
+        try:
+            print('start excecute_analysis - getting analysis...')
+            analysis = Analysis.objects.get(id=analysis_id)
+            print('excecute_analysis - getting repository...')
+            repository = Repository.objects.get(id=analysis.repository_id)
+            
+            if(repository.is_being_analyzed()):
+                status_msg=f'excecute_analysis - an analysis is already executing for this repository {repository.id}...'
+                print(status_msg)
+                analysis.cancel(status_msg)
+                return False
 
-        print(f"excecute_analysis - start - analysis: {analysis} ")
-        if (CeleryTaskSignal.is_task_cancelled(analysis)):
-            print(f"excecute_analysis - is_task_cancelled True")
-            return False
-        #Cambiar el estado del analisis a ejecutandose
-        analysis.start()
+            print(f"excecute_analysis - start - analysis: {analysis} ")
+            if (CeleryTaskSignal.is_task_cancelled(analysis)):
+                print(f"excecute_analysis - is_task_cancelled True")
+                return False
+            analysis.start()
 
-        print(f"excecute_analysis - download repository - analysis: {analysis} ")
-        if (CeleryTaskSignal.is_task_cancelled(analysis)):
-            print(f"excecute_analysis - is_task_cancelled True")
-            return False
-        #try:
-        #descargar el repositorio
-        repository.download()
-        commit = repository.get_last_commit()
-        #seteo el commit
-        if (CeleryTaskSignal.is_task_cancelled(analysis)):
-            print(f"excecute_analysis - is_task_cancelled True")
-            return False
-        analysis.set_commit(commit)
+            print(f"excecute_analysis - download repository - analysis: {analysis} ")
+            if (CeleryTaskSignal.is_task_cancelled(analysis)):
+                print(f"excecute_analysis - is_task_cancelled True")
+                return False
+            repository.download()
+            commit = repository.get_last_commit()
+            if (CeleryTaskSignal.is_task_cancelled(analysis)):
+                print(f"excecute_analysis - is_task_cancelled True")
+                return False
+            analysis.set_commit(commit)
 
-        print(f"excecute_analysis - run - analysis: {analysis} ")
-        if (CeleryTaskSignal.is_task_cancelled(analysis)):
-            print(f"excecute_analysis - is_task_cancelled True")
+            print(f"excecute_analysis - run - analysis: {analysis} ")
+            if (CeleryTaskSignal.is_task_cancelled(analysis)):
+                print(f"excecute_analysis - is_task_cancelled True")
+                return False
+            analysis.run()
+            
+            return True
+        except BaseException as err:
+            print(f"excecute_analysis - Unexpected error: {err}")
+            try:
+                analysis = Analysis.objects.get(id=analysis_id)
+                analysis.status = tools_status.FAILED
+                analysis.status_msg = str(err)[:256]
+                analysis.save()
+            except BaseException:
+                pass
             return False
-        #ejecutar el analisis
-        analysis.run()
-        
-        return True
 
     @staticmethod
     @shared_task

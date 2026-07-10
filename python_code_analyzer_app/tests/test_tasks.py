@@ -48,6 +48,15 @@ class ExecuteAnalysisTaskTest(TestCase):
         self.assertEqual(self.analysis.status, tools_status.CANCELLED)
 
     @patch.object(Repository, 'download')
+    def test_excecute_analysis_sets_failed_on_exception(self, mock_download):
+        mock_download.side_effect = Exception("git clone failed")
+        result = TaskManager.excecute_analysis(self.analysis.id)
+        self.assertFalse(result)
+        self.analysis.refresh_from_db()
+        self.assertEqual(self.analysis.status, tools_status.FAILED)
+        self.assertIn("git clone failed", self.analysis.status_msg)
+
+    @patch.object(Repository, 'download')
     @patch.object(Repository, 'get_last_commit')
     @patch.object(Analysis, 'run')
     def test_excecute_analysis_stops_if_cancelled_before_start(self, mock_run, mock_get_last_commit, mock_download):
