@@ -63,18 +63,15 @@ class Pylint_Tool(Tool):
         db_table = 'python_code_analyzer_app_tool'
     
     def _add(self,details,detail):
-        if(detail != None):
+        if detail is not None:
             details.append(detail)
             msg = detail["message"].rstrip()
             index = msg.rfind('(')
-            # Si no se encuentra el carácter '(', lanzamos una excepción
-            if index == -1:
-                raise ValueError("No se encontró el carácter '(' en la cadena")
-            # Obtener el mensaje y la categoría del mensaje usando rebanado de cadenas
-            message = msg[:index].strip()
-            category = msg[index+1:-1]
-            detail["symbol"]=category
-            detail["message"] = message
+            if index != -1:
+                message = msg[:index].strip()
+                category = msg[index+1:-1]
+                detail["symbol"] = category
+                detail["message"] = message
             detail = None
 
     def _getType(self,message_id):
@@ -138,7 +135,7 @@ class Pylint_Tool(Tool):
             elif line.startswith('------------------------------------'):
                 None
             else:#el caso de que sea la continuación del mensaje
-                if line != "":
+                if line != "" and detail is not None:
                     detail['message'] = detail['message'] + line
                 
 
