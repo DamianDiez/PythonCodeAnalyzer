@@ -245,7 +245,7 @@ class CeleryTaskSignalTest(TestCase):
         )
         self.assertFalse(CeleryTaskSignal.is_task_cancelled(self.analysis.id))
 
-    def test_is_task_cancelled_does_not_persist_completed_flag_due_to_bug(self):
+    def test_is_task_cancelled_persists_completed_flag(self):
         cts = CeleryTaskSignal.objects.create(
             analysis=self.analysis,
             signal=CeleryTaskSignal.CANCEL_TASK,
@@ -253,7 +253,7 @@ class CeleryTaskSignalTest(TestCase):
         )
         CeleryTaskSignal.is_task_cancelled(self.analysis.id)
         cts.refresh_from_db()
-        self.assertFalse(cts.completed)
+        self.assertTrue(cts.completed)
 
     def test_mark_completed_sets_completed_true(self):
         cts = CeleryTaskSignal.objects.create(

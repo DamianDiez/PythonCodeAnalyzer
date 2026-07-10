@@ -105,14 +105,12 @@ class CeleryTaskSignal(models.Model):
 
     @staticmethod
     def is_task_cancelled(analysis):
-        #chequear que el analisis no se haya cancelado
-        cts = CeleryTaskSignal.objects.filter(signal=CeleryTaskSignal.CANCEL_TASK,
+        updated = CeleryTaskSignal.objects.filter(
+            signal=CeleryTaskSignal.CANCEL_TASK,
             completed=False,
-            analysis = analysis)
-        if(cts):
-            cts.completed = True
-            return True
-        return False
+            analysis=analysis
+        ).update(completed=True)
+        return updated > 0
 
     def mark_completed(self, save=True):
         self.completed = True
