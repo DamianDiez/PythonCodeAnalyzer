@@ -19,8 +19,8 @@
 {% endblock page_header %}
 {% block content %}
 
-<div class="mb-2"style="margin-top: 20;">
-	<div class='row'>
+<div class="container-fluid mt-3">
+	<div class="row">
 		{% for item in result_items %}
 			{% include item.plantilla with item=item %}
 		{% endfor %}
