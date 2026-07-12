@@ -1,4 +1,7 @@
-pca_env/ 
+pca_env/
 __pycache__/
 *.sqlite3
+*.log
 .coverage
+cookies.txt
+analyzer_data/
