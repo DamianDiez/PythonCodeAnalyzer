@@ -22,6 +22,7 @@
 			  <tr>
 				<th>Id</th>
 				<th>Url</th>
+				<th>Status</th>
 				<th>Actions</th>
 			  </tr>
 			</thead>
@@ -30,6 +31,11 @@
 			<tr class="text-light">
 				<td>{{ repo.id }}</td>
 				<td>{{ repo }}</td>
+				<td>
+					{% with badge=repo.last_analysis_badge %}
+					<span class="badge {{ badge.1 }}">{{ badge.0 }}</span>
+					{% endwith %}
+				</td>
 				<td>
 					<div class="row">
 						<a href="{% url 'python_code_analyzer_app:repository' repo.id %}" class="btn btn-dark" title="View analyzes"><i class="fa fa-eye"></i></a>
@@ -41,7 +47,7 @@
 			</tr>
 			{% empty %}
 				<tr class="text-light">
-					<td colspan="3">No repositories have been added yet.</td>
+					<td colspan="4">No repositories have been added yet.</td>
 				</tr>
 			{% endfor %}
 			</tbody>

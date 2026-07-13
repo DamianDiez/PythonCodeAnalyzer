@@ -263,3 +263,92 @@ class CeleryTaskSignalTest(TestCase):
         )
         cts.mark_completed()
         self.assertTrue(cts.completed)
+
+
+class RepositoryLastAnalysisTest(TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        settings.BASE_PATH = self.temp_dir + "\\"
+        self.user = User.objects.create_user("testuser")
+        self.repo = Repository.objects.create(
+            url="https://github.com/test/repo.git", owner=self.user, folder="test_repo"
+        )
+        os.makedirs(self.repo.path)
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def test_repo_without_analysis_returns_none(self):
+        self.assertIsNone(self.repo.last_analysis)
+
+    def test_repo_with_single_analysis_returns_it(self):
+        analysis = Analysis.objects.create(repository=self.repo)
+        self.assertEqual(self.repo.last_analysis, analysis)
+
+    def test_repo_with_multiple_analyses_returns_most_recent(self):
+        from django.utils import timezone
+        from datetime import timedelta
+
+        oldest = Analysis.objects.create(repository=self.repo)
+        Analysis.objects.filter(id=oldest.id).update(
+            date_added=timezone.now() - timedelta(days=3)
+        )
+        middle = Analysis.objects.create(repository=self.repo)
+        Analysis.objects.filter(id=middle.id).update(
+            date_added=timezone.now() - timedelta(days=1)
+        )
+        newest = Analysis.objects.create(repository=self.repo)
+        self.assertEqual(self.repo.last_analysis, newest)
+
+    def test_repo_with_analysis_in_different_states(self):
+        from django.utils import timezone
+        from datetime import timedelta
+
+        old_finished = Analysis.objects.create(
+            repository=self.repo, status=tools_status.FINISHED
+        )
+        Analysis.objects.filter(id=old_finished.id).update(
+            date_added=timezone.now() - timedelta(days=5)
+        )
+        recent_pending = Analysis.objects.create(
+            repository=self.repo, status=tools_status.PENDING
+        )
+        self.assertEqual(self.repo.last_analysis, recent_pending)
+        self.assertEqual(self.repo.last_analysis.status, tools_status.PENDING)
+
+
+class RepositoryLastAnalysisBadgeTest(TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        settings.BASE_PATH = self.temp_dir + "\\"
+        self.user = User.objects.create_user("testuser")
+        self.repo = Repository.objects.create(
+            url="https://github.com/test/repo.git", owner=self.user, folder="test_repo"
+        )
+        os.makedirs(self.repo.path)
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def test_badge_sin_analisis(self):
+        self.assertEqual(self.repo.last_analysis_badge, ('Sin análisis', 'badge-light'))
+
+    def test_badge_pending(self):
+        Analysis.objects.create(repository=self.repo, status=tools_status.PENDING)
+        self.assertEqual(self.repo.last_analysis_badge, ('Pendiente', 'badge-secondary'))
+
+    def test_badge_running(self):
+        Analysis.objects.create(repository=self.repo, status=tools_status.RUNNING)
+        self.assertEqual(self.repo.last_analysis_badge, ('En ejecución', 'badge-primary'))
+
+    def test_badge_finished(self):
+        Analysis.objects.create(repository=self.repo, status=tools_status.FINISHED)
+        self.assertEqual(self.repo.last_analysis_badge, ('Finalizado', 'badge-success'))
+
+    def test_badge_failed(self):
+        Analysis.objects.create(repository=self.repo, status=tools_status.FAILED)
+        self.assertEqual(self.repo.last_analysis_badge, ('Fallido', 'badge-danger'))
+
+    def test_badge_cancelled(self):
+        Analysis.objects.create(repository=self.repo, status=tools_status.CANCELLED)
+        self.assertEqual(self.repo.last_analysis_badge, ('Cancelado', 'badge-warning'))

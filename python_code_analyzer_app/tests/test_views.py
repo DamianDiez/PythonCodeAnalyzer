@@ -1,10 +1,12 @@
 import os
 import tempfile
+from datetime import timedelta
 from unittest.mock import patch, MagicMock
 from django.test import TestCase
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils import timezone
 from python_code_analyzer_app.models import Repository, Analysis, Tool, AnalysisTool
 from python_code_analyzer_app.app_models import tools_status
 
@@ -193,3 +195,48 @@ class CancelAnalysisViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.analysis.refresh_from_db()
         self.assertEqual(self.analysis.status, tools_status.CANCELLED)
+
+
+class RepositoriesBadgeViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user("testuser", password="pass1234")
+        self.client.login(username="testuser", password="pass1234")
+
+    def test_repositories_shows_badge_for_repo_with_finished_analysis(self):
+        repo = Repository.objects.create(url="https://github.com/user1/repo.git", owner=self.user)
+        Analysis.objects.create(repository=repo, status=tools_status.FINISHED)
+        response = self.client.get(reverse('python_code_analyzer_app:repositories'))
+        self.assertContains(response, "badge-success")
+        self.assertContains(response, "Finalizado")
+
+    def test_repositories_shows_badge_without_analysis(self):
+        Repository.objects.create(url="https://github.com/user1/repo.git", owner=self.user)
+        response = self.client.get(reverse('python_code_analyzer_app:repositories'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "badge-light")
+        self.assertContains(response, "Sin análisis")
+
+    def test_repositories_shows_most_recent_status_over_older(self):
+        repo = Repository.objects.create(url="https://github.com/user1/repo.git", owner=self.user)
+        old_pending = Analysis.objects.create(repository=repo, status=tools_status.PENDING)
+        Analysis.objects.filter(id=old_pending.id).update(
+            date_added=timezone.now() - timedelta(days=5)
+        )
+        Analysis.objects.create(repository=repo, status=tools_status.RUNNING)
+        response = self.client.get(reverse('python_code_analyzer_app:repositories'))
+        self.assertContains(response, "badge-primary")
+        self.assertContains(response, "En ejecución")
+        self.assertNotContains(response, "Pendiente")
+        self.assertNotContains(response, "badge-secondary")
+
+    def test_repositories_badge_on_second_page(self):
+        repos = []
+        for i in range(9):
+            r = Repository.objects.create(
+                url=f"https://github.com/user1/repo{i}.git", owner=self.user
+            )
+            repos.append(r)
+        Analysis.objects.create(repository=repos[8], status=tools_status.FINISHED)
+        response = self.client.get(reverse('python_code_analyzer_app:repositories') + '?page=2')
+        self.assertContains(response, "badge-success")
+        self.assertContains(response, "Finalizado")

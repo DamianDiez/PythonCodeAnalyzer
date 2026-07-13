@@ -18,6 +18,15 @@ class Repository(models.Model):
     folder = models.CharField(max_length=256, default=datetime.now().strftime("%Y%m%d%H%M%S%f"))
     date_added = models.DateTimeField(auto_now_add=True) 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    BADGE_MAP = {
+        tools_status.PENDING:    ('Pendiente', 'badge-secondary'),
+        tools_status.RUNNING:    ('En ejecución', 'badge-primary'),
+        tools_status.FINISHED:   ('Finalizado', 'badge-success'),
+        tools_status.FAILED:     ('Fallido', 'badge-danger'),
+        tools_status.CANCELLED:  ('Cancelado', 'badge-warning'),
+    }
+
     class Meta:
         verbose_name_plural = 'repositories'
     def __str__(self):
@@ -27,6 +36,17 @@ class Repository(models.Model):
     @property
     def path(self):
         return os.path.join(settings.BASE_PATH,self.folder)
+
+    @property
+    def last_analysis(self):
+        return self.analysis_set.order_by('date_added').last()
+
+    @property
+    def last_analysis_badge(self):
+        analysis = self.last_analysis
+        if analysis is None:
+            return ('Sin análisis', 'badge-light')
+        return self.BADGE_MAP.get(analysis.status, ('Sin análisis', 'badge-light'))
 
     def download(self):
         print(f'Repository.donwnload - repository path {self.path}..')
