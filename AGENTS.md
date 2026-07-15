@@ -26,4 +26,6 @@
 - Enumerar posibles riesgos.
 - Indicar si quedaron tareas pendientes.
 - Ejecutar los tests relevantes: `python manage.py test`
+- Realizar una validación manual de la funcionalidad.
+- No asumir que los tests garantizan que la UI funciona correctamente.
 - Realizar una self-review del cambio antes de dar la tarea por terminada.
